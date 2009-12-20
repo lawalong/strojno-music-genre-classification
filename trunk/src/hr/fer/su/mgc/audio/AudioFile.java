@@ -71,10 +71,15 @@ public class AudioFile {
 
 			// Setting maximum in miliseconds...
 			mainRef.playerSlider.setMaximum(length / 1000);
-
-			String title = properties.get("title").toString();
-			String author = properties.get("author").toString();
-			String genre = properties.get("mp3.id3tag.genre").toString();
+			
+			String title = null, author = null, genre = null;
+			try {
+				title = properties.get("title").toString();
+				author = properties.get("author").toString();
+				genre = properties.get("mp3.id3tag.genre").toString();
+				
+			} catch (Exception Ignorable) { }
+			
 			if (title == null)
 				title = "Unknown";
 			if (author == null)

@@ -1,7 +1,0 @@
-function out2file( code, filepath )
-%OUT2FILE Summary of this function goes here
-%   Detailed explanation goes here
-
-    fid = fopen(filepath);
-    fprintf(fid, eval(code));
-end

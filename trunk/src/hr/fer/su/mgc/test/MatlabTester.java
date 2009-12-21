@@ -9,7 +9,7 @@ public class MatlabTester {
 
 	public static void main(String[] args) {
 
-		LinuxMatlabEngine engine = new LinuxMatlabEngine();
+		LinuxMatlabEngine engine = new LinuxMatlabEngine(System.getProperty("user.home"));
 
 		try {
 			engine.open();
@@ -26,6 +26,8 @@ public class MatlabTester {
 			e.printStackTrace();
 		} catch (MatlabException e) {
 			System.err.println(e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			engine.close();
 		}

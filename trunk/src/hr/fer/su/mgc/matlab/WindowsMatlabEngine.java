@@ -10,22 +10,30 @@ public class WindowsMatlabEngine extends MatlabEngine {
 	private int tmpDataCounter;
 	private File tmpDataFile;
 	
-	public WindowsMatlabEngine() {
+	public WindowsMatlabEngine(String matlabStartDir) {
+		super(matlabStartDir);
 		tmpDataCounter = 0;
 	}
 
 	
-	public void open() throws IOException, MatlabException {
+	public void open() {
 		// In Windows implementation we do nothing...	
 	}
 	
-	public String evalString(String str) throws IOException, MatlabException {
+	public String evalString(String str) throws Exception {
 		
 		genTmpFile();
 		
 		// str = "fprintf(fopen(" + tmpDataFile + "), num2str([1:30]););";
 		
 		str = "tmp_file = '" + tmpDataFile.getAbsolutePath() + "'; " + str + ";";
+		
+		// Set user path if necessary...
+		if(matlabStartDir != null) 
+			if(matlabStartDir.exists())
+				str = "cd " + matlabStartDir.getAbsolutePath() + "; ";
+			else throw new Exception("Start dir " + 
+					matlabStartDir.getAbsolutePath() + " does not exist!");
 		
 		matlabProcess = Runtime.getRuntime().exec(
 				"matlab -nojvm -r \"" + str + "\"");

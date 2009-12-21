@@ -16,15 +16,14 @@ public class LinuxMatlabEngine extends MatlabEngine {
 	private StringBuffer outputStringBuffer;
 	private static final int BUFFERSIZE = 65536;
 
-	public LinuxMatlabEngine() {
+	public LinuxMatlabEngine(String matlabStartDir) {
+		super(matlabStartDir);
 		outputBuffer = new char[BUFFERSIZE];
 		errorMessage = "";
 		outputStringBuffer = new StringBuffer();
-		
-		// Check for os type...
 	}
 
-	public void open() throws IOException, MatlabException {
+	public void open() throws Exception, IOException, MatlabException {
 		try {
 			matlabProcess = Runtime.getRuntime().exec("matlab -nosplash -nojvm");
 			reader = new BufferedReader(
@@ -39,6 +38,13 @@ public class LinuxMatlabEngine extends MatlabEngine {
 			
 			// Set compact formating...
 			evalString("format('compact');");
+			
+			// Set user path...
+			if(matlabStartDir != null) 
+				if(matlabStartDir.exists())
+					evalString("cd " + matlabStartDir.getAbsolutePath());
+				else throw new Exception("Start dir " + 
+						matlabStartDir.getAbsolutePath() + " does not exist!");
 			
 		} catch (IOException ex) {
 			System.err.println("ERROR: Matlab could not be opened.");

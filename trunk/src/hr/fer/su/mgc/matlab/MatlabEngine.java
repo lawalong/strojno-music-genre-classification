@@ -1,30 +1,33 @@
 package hr.fer.su.mgc.matlab;
 
+import java.io.File;
 import java.io.IOException;
 
 public abstract class MatlabEngine {
 	
+	protected File matlabStartDir;
+	
 	protected Process matlabProcess;
 	
-	public static MatlabEngine getInstance() throws UnsupportedOSException {
+	public static MatlabEngine getInstance(String matlabStartDir) throws UnsupportedOSException {
 		
 		// Check for os type...
 		String osType = System.getProperty("os.name");
 		if(osType.startsWith("Linux"))
-			return new LinuxMatlabEngine();
+			return new LinuxMatlabEngine(matlabStartDir);
 		else if(osType.startsWith("Windows"))
-			return new WindowsMatlabEngine();
+			return new WindowsMatlabEngine(matlabStartDir);
 		else throw new UnsupportedOSException(
 				osType + " not supported. Only Linux and Windows are currently supported.");
 	}
 	
-	public MatlabEngine() {
-
+	public MatlabEngine(String matlabStartDir) {
+		this.matlabStartDir = new File(matlabStartDir);
 	}
 	
-	public abstract void open() throws IOException, MatlabException;
+	public abstract void open() throws Exception, IOException, MatlabException;
 	
-	public abstract String evalString(String str) throws IOException, MatlabException;
+	public abstract String evalString(String str) throws Exception, IOException, MatlabException;
 	
 	public abstract void close();
 	

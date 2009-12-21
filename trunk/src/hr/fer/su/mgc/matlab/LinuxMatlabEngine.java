@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-public class MatlabEngine {
+public class LinuxMatlabEngine {
 
 	private Process matlabProcess;
 	private BufferedReader reader;
@@ -17,10 +17,12 @@ public class MatlabEngine {
 	private StringBuffer outputStringBuffer;
 	private static final int BUFFERSIZE = 65536;
 
-	public MatlabEngine() {
+	public LinuxMatlabEngine() {
 		outputBuffer = new char[BUFFERSIZE];
 		errorMessage = "";
 		outputStringBuffer = new StringBuffer();
+		
+		// Check for os type...
 	}
 
 	public void open() throws IOException, MatlabException {

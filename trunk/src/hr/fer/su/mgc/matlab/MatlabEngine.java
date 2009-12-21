@@ -26,7 +26,7 @@ public class MatlabEngine {
 	public void open() throws IOException, MatlabException {
 		try {
 			matlabProcess = Runtime.getRuntime().
-				exec("/usr/custom/matlab/2009a/bin/matlab -nosplash -nojvm");
+				exec("matlab -nosplash -nojvm");
 			reader = new BufferedReader(
 				new InputStreamReader(matlabProcess.getInputStream()));
 			errReader = new BufferedReader(

@@ -4,7 +4,7 @@ function extractFeatures( datasetpath, testname, genres )
 %   genres = which genres to include to extraction
 
     bn = 24;
-    fid = fopen(strcat(testname, '.arff'), 'w');
+    fid = fopen(sprintf('extractedFeatures/%s.arff', testname), 'w');
     fprintf(fid, '@RELATION %s\r\n\r\n', testname);
     features = {'BPM1', 'BPM2', 'BPM1pow', 'stdSC', 'meanSC', 'medSC', 'maxSC', 'stdSF', 'meanSF', 'medSF', 'maxSF', 'stdSR', 'meanSR', 'medSR', 'maxSR', 'stdSTE', 'meanSTE', 'medSTE', 'maxSTE', 'stdZCR', 'meanZCR', 'medZCR', 'maxZCR'};
     for i=1:5; features=[features, sprintf('stdMFCC_%d', i), sprintf('meanMFCC_%d', i), sprintf('medianMFCC_%d', i), sprintf('maxMFCC_%d', i)]; end;

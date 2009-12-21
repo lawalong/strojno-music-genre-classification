@@ -7,7 +7,7 @@ function extractFeaturesHammingTest( datasetpath, testname, genres, hammin, hamm
     fids = {};
     hamw = ones(1,hamn) * hammin + [0:hamn-1] * ((hammax-hammin)/(hamn-1));
     for i=1:hamn
-        fids = [fids, fopen(sprintf('%s_ham%.1f.arff', testname, hamw(i)), 'w')];
+        fids = [fids, fopen(sprintf('extractedFeatures/%s_ham%.2f.arff', testname, hamw(i)), 'w')];
     end
     for i=1:hamn; fprintf(fids{i}, '@RELATION %s_ham%.1f\r\n\r\n', testname, hamw(i)); end;
     features = {'BPM1', 'BPM2', 'BPM1pow', 'stdSC', 'meanSC', 'medSC', 'maxSC', 'stdSF', 'meanSF', 'medSF', 'maxSF', 'stdSR', 'meanSR', 'medSR', 'maxSR', 'stdSTE', 'meanSTE', 'medSTE', 'maxSTE', 'stdZCR', 'meanZCR', 'medZCR', 'maxZCR'};
@@ -44,13 +44,15 @@ function extractFeaturesHammingTest( datasetpath, testname, genres, hammin, hamm
             bn = 24;
             ftrs1 = getTempo(d,sr);
             res = {};
-            for i=1:hamn; res = [res, getWindowedFeatures(d, sr, hamw(i), {@getSC, @getSF, @getSR, @getSTE, @getZCR})]; end;
+            for i=1:hamn
+                res = [res, {getWindowedFeatures(d, sr, hamw(i), {@getSC, @getSF, @getSR, @getSTE, @getZCR})}];
+            end
             mfcc = getMFCC(d,sr);
             [mn, md, mx, band] = getPower(d, sr, bn);
             ftrs2={};
             for j=1:hamn; ftrs2{j}={}; end;
             ftrs3={};
-            for j=1:hamn; for i=1:length(res{j}); ftrs2{j} = [ftrs2{j}, std(res{j}(i)), mean(res{j}(i)), median(res{j}(i)), max(res{j}(i))]; end; end;
+            for j=1:hamn; for i=1:length(res{j}); ftrs2{j} = [ftrs2{j}, std(res{j}{i}), mean(res{j}{i}), median(res{j}{i}), max(res{j}{i})]; end; end;
             for i=1:length(mfcc); ftrs3 = [ftrs3, std(mfcc{i}), mean(mfcc{i}), median(mfcc{i}), max(mfcc{i})]; end;
             ftrs3 = [ftrs3, mn, md, mx];
             ftrs3 = [ftrs3, band];

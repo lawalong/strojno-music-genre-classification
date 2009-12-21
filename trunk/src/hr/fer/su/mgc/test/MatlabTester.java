@@ -2,14 +2,14 @@ package hr.fer.su.mgc.test;
 
 import java.io.IOException;
 
-import hr.fer.su.mgc.matlab.MatlabEngine;
-import hr.fer.su.mgc.matlab.MatlabEngine.MatlabException;
+import hr.fer.su.mgc.matlab.LinuxMatlabEngine;
+import hr.fer.su.mgc.matlab.LinuxMatlabEngine.MatlabException;
 
 public class MatlabTester {
 
 	public static void main(String[] args) {
 
-		MatlabEngine engine = new MatlabEngine();
+		LinuxMatlabEngine engine = new LinuxMatlabEngine();
 
 		try {
 			engine.open();

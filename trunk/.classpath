@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="lib/tritonus_dsp-0.3.6.jar"/>
 	<classpathentry kind="lib" path="lib/tritonus_misc.jar"/>
 	<classpathentry kind="lib" path="lib/tritonus_mp3.jar"/>
+	<classpathentry kind="lib" path="lib/weka.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

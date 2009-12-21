@@ -6,9 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-public class LinuxMatlabEngine {
+public class LinuxMatlabEngine extends MatlabEngine {
 
-	private Process matlabProcess;
 	private BufferedReader reader;
 	private BufferedWriter writer;
 	private BufferedReader errReader;
@@ -27,8 +26,7 @@ public class LinuxMatlabEngine {
 
 	public void open() throws IOException, MatlabException {
 		try {
-			matlabProcess = Runtime.getRuntime().
-				exec("matlab -nosplash -nojvm");
+			matlabProcess = Runtime.getRuntime().exec("matlab -nosplash -nojvm");
 			reader = new BufferedReader(
 				new InputStreamReader(matlabProcess.getInputStream()));
 			errReader = new BufferedReader(
@@ -128,12 +126,6 @@ public class LinuxMatlabEngine {
 		} catch (IOException Ignorable) { }
 	}
 	
-	public class MatlabException extends Exception {
-		private static final long serialVersionUID = 1687200595982655087L;
-		
-		public MatlabException(String errorMessage) {
-			super(errorMessage);
-		}
-	}
+
 
 }

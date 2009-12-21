@@ -1,9 +1,9 @@
 package hr.fer.su.mgc.test;
 
-import java.io.IOException;
-
 import hr.fer.su.mgc.matlab.LinuxMatlabEngine;
-import hr.fer.su.mgc.matlab.LinuxMatlabEngine.MatlabException;
+import hr.fer.su.mgc.matlab.MatlabEngine.MatlabException;
+
+import java.io.IOException;
 
 public class MatlabTester {
 

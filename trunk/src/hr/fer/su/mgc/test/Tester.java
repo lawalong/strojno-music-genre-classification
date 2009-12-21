@@ -1,10 +1,9 @@
 package hr.fer.su.mgc.test;
 
 import java.io.IOException;
+import java.util.GregorianCalendar;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
-
-import com.meapsoft.DSP;
 
 
 public class Tester {
@@ -12,14 +11,17 @@ public class Tester {
 
 	public static void main(String[] args) throws UnsupportedAudioFileException, IOException {
 		
-		double[][] a = new double[100][100];
+		long time = GregorianCalendar.getInstance().getTimeInMillis();
 		
-		for(int i = 0; i < 100; i++)
-			for(int j = 0; j < 100; j++)
-				a[i][j] = -i - 5*j;
+		StringBuffer sb = new StringBuffer();
 		
-		DSP.imagesc(a);
-
+		for(int i = 0; i < 10000000; i++) {
+			sb.append(i);
+			sb.setLength(0);
+		}
+		
+		System.out.println("Time passed: " + 
+				((float)(GregorianCalendar.getInstance().getTimeInMillis()-time)/1000) + " seconds.");
 	}
 
 }

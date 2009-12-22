@@ -40,8 +40,8 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 			else throw new Exception("Start dir " + 
 					matlabWorkDir.getAbsolutePath() + " does not exist!");
 		
-		command += "temp_file = fopen('" + tmpDataFile.getAbsolutePath() + "'); ";
-		command += "fprintf(temp_file, num2str(exSongFeatures('" + song.getAbsolutePath() + "'))); ";
+		command += "temp_file = fopen('" + tmpDataFile.getAbsolutePath() + "', 'w'); ";
+		command += "fprintf(temp_file, '%s', num2str(exSongFeatures('" + song.getAbsolutePath() + "'))); ";
 		command += "fclose(temp_file); quit(); ";
 		
 		matlabProcess = Runtime.getRuntime().exec(

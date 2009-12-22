@@ -12,7 +12,7 @@ public class MatlabSmartTester {
 		
 		Config.init();
 		
-		SmartMatlabEngine engine = SmartMatlabEngine.getInstance("./matlab");
+		SmartMatlabEngine engine = SmartMatlabEngine.getInstance("matlab");
 		
 		engine.open();
 		

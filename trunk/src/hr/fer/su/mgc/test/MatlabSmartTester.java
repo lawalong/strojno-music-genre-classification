@@ -1,23 +1,22 @@
 package hr.fer.su.mgc.test;
 
 import hr.fer.su.mgc.Config;
-import hr.fer.su.mgc.matlab.SmartLinuxMatlabEngine;
-import hr.fer.su.mgc.matlab.MatlabEngine.MatlabException;
+import hr.fer.su.mgc.matlab.MatlabException;
+import hr.fer.su.mgc.matlab.SmartMatlabEngine;
 
 import java.io.File;
-import java.io.IOException;
 
 public class MatlabSmartTester {
 	
-	public static void main(String[] args) throws IOException, MatlabException, Exception {
+	public static void main(String[] args) throws Exception, MatlabException {
 		
 		Config.init();
 		
-		SmartLinuxMatlabEngine engine = new SmartLinuxMatlabEngine("./matlab");
+		SmartMatlabEngine engine = SmartMatlabEngine.getInstance("./matlab");
 		
 		engine.open();
 		
-		for(double var : engine.extractSongFeatures(new File("./dataset/jazz/jazz.000001"))) {
+		for(double var : engine.extractSongFeatures(new File("dataset/jazz/jazz.00001.au"))) {
 			System.out.println(var);
 		}
 		

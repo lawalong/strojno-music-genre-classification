@@ -2,7 +2,7 @@ package hr.fer.su.mgc.test;
 
 import hr.fer.su.mgc.Config;
 import hr.fer.su.mgc.matlab.LinuxMatlabEngine;
-import hr.fer.su.mgc.matlab.MatlabEngine.MatlabException;
+import hr.fer.su.mgc.matlab.MatlabException;
 
 import java.io.IOException;
 

@@ -45,7 +45,7 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 		command += "fclose(temp_file); quit(); ";
 		
 		matlabProcess = Runtime.getRuntime().exec(
-				"matlab -nojvm -r \"" + command + "\"");
+				"matlab -wait -nojvm -r \"" + command + "\"");
 		
 		while(true) {
 			try {

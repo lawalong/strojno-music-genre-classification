@@ -16,13 +16,16 @@ public class MGC {
 	 * Main frame reference...
 	 */
 	protected static JFrame mainFrameRef;
+	
 
 	public static void main(String[] args) throws JavaLayerException, UnsupportedAudioFileException, IOException, InterruptedException {
+		
+		Config.init();
 
 		loadGUI();
 		
 	}
-
+	
 	
 	private static void loadGUI() {
 		SwingUtilities.invokeLater(new Runnable() {

@@ -1,5 +1,6 @@
 package hr.fer.su.mgc.test;
 
+import hr.fer.su.mgc.Config;
 import hr.fer.su.mgc.matlab.LinuxMatlabEngine;
 import hr.fer.su.mgc.matlab.MatlabEngine.MatlabException;
 
@@ -8,6 +9,12 @@ import java.io.IOException;
 public class MatlabTester {
 
 	public static void main(String[] args) {
+		
+		try {
+			Config.init();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 
 		LinuxMatlabEngine engine = new LinuxMatlabEngine(System.getProperty("user.home"));
 

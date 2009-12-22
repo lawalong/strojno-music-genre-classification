@@ -5,24 +5,24 @@ import java.io.IOException;
 
 public abstract class MatlabEngine {
 	
-	protected File matlabStartDir;
+	protected File matlabWorkDir;
 	
 	protected Process matlabProcess;
 	
-	public static MatlabEngine getInstance(String matlabStartDir) throws UnsupportedOSException {
+	public static MatlabEngine getInstance(String matlabWorkDir) throws UnsupportedOSException {
 		
 		// Check for os type...
 		String osType = System.getProperty("os.name");
 		if(osType.startsWith("Linux"))
-			return new LinuxMatlabEngine(matlabStartDir);
+			return new LinuxMatlabEngine(matlabWorkDir);
 		else if(osType.startsWith("Windows"))
-			return new WindowsMatlabEngine(matlabStartDir);
+			return new WindowsMatlabEngine(matlabWorkDir);
 		else throw new UnsupportedOSException(
 				osType + " not supported. Only Linux and Windows are currently supported.");
 	}
 	
 	public MatlabEngine(String matlabStartDir) {
-		this.matlabStartDir = new File(matlabStartDir);
+		this.matlabWorkDir = new File(matlabStartDir);
 	}
 	
 	public abstract void open() throws Exception, IOException, MatlabException;

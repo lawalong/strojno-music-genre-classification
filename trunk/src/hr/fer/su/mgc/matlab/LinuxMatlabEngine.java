@@ -1,5 +1,7 @@
 package hr.fer.su.mgc.matlab;
 
+import hr.fer.su.mgc.Config;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -25,7 +27,8 @@ public class LinuxMatlabEngine extends MatlabEngine {
 
 	public void open() throws Exception, IOException, MatlabException {
 		try {
-			matlabProcess = Runtime.getRuntime().exec("matlab -nosplash -nojvm");
+			matlabProcess = Runtime.getRuntime().exec(
+					Config.getProperty("MATLAB_ROOT") + "/bin/matlab -nojvm -nosplash");
 			reader = new BufferedReader(
 				new InputStreamReader(matlabProcess.getInputStream()));
 			errReader = new BufferedReader(
@@ -40,14 +43,14 @@ public class LinuxMatlabEngine extends MatlabEngine {
 			evalString("format('compact');");
 			
 			// Set user path...
-			if(matlabStartDir != null) 
-				if(matlabStartDir.exists())
-					evalString("cd " + matlabStartDir.getAbsolutePath());
+			if(matlabWorkDir != null) 
+				if(matlabWorkDir.exists())
+					evalString("cd " + matlabWorkDir.getAbsolutePath());
 				else throw new Exception("Start dir " + 
-						matlabStartDir.getAbsolutePath() + " does not exist!");
+						matlabWorkDir.getAbsolutePath() + " does not exist!");
 			
 		} catch (IOException ex) {
-			System.err.println("ERROR: Matlab could not be opened.");
+			System.err.println("ERROR: Matlab could not be opened. " + ex.getMessage());
 			throw (ex);
 		}
 	}
@@ -115,9 +118,16 @@ public class LinuxMatlabEngine extends MatlabEngine {
 				throw new MatlabException(errorMessage);
 			}
 		}
+		
+		String result;
 
-		String result = outputStringBuffer.
-			substring(0, outputStringBuffer.length()-4); // Remove "\n>> "
+		try {
+			result = outputStringBuffer.
+				substring(0, outputStringBuffer.length()-4); // Remove "\n>> "
+		} catch (StringIndexOutOfBoundsException ex) {
+			result = outputStringBuffer.
+				substring(0, outputStringBuffer.length()-3); // Remove ">> "
+		}
 		
 		outputStringBuffer = new StringBuffer();
 		return result;
@@ -129,7 +139,7 @@ public class LinuxMatlabEngine extends MatlabEngine {
 			errReader.close();
 			writer.close();
 			matlabProcess.destroy();
-		} catch (IOException Ignorable) { }
+		} catch (Throwable Ignorable) { }
 	}
 	
 

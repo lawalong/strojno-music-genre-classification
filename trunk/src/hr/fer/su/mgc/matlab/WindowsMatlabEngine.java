@@ -29,11 +29,11 @@ public class WindowsMatlabEngine extends MatlabEngine {
 		str = "tmp_file = '" + tmpDataFile.getAbsolutePath() + "'; " + str + ";";
 		
 		// Set user path if necessary...
-		if(matlabStartDir != null) 
-			if(matlabStartDir.exists())
-				str = "cd " + matlabStartDir.getAbsolutePath() + "; ";
+		if(matlabWorkDir != null) 
+			if(matlabWorkDir.exists())
+				str = "cd " + matlabWorkDir.getAbsolutePath() + "; ";
 			else throw new Exception("Start dir " + 
-					matlabStartDir.getAbsolutePath() + " does not exist!");
+					matlabWorkDir.getAbsolutePath() + " does not exist!");
 		
 		matlabProcess = Runtime.getRuntime().exec(
 				"matlab -nojvm -r \"" + str + "\"");
@@ -50,6 +50,7 @@ public class WindowsMatlabEngine extends MatlabEngine {
 		String retVal = tmpReader.readLine();
 		
 		tmpReader.close();
+		if(tmpDataFile.exists()) tmpDataFile.delete();
 		
 		return retVal;
 	}

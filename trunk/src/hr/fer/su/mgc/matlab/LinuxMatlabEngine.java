@@ -113,7 +113,7 @@ public class LinuxMatlabEngine extends MatlabEngine {
 		if(!receive()) {
 			outputStringBuffer = new StringBuffer();
 			try {
-				throw new MatlabException(errorMessage.substring(6, errorMessage.length()-4));
+				throw new MatlabException(errorMessage.substring(4, errorMessage.length()-4));
 			} catch (IndexOutOfBoundsException ex) {
 				throw new MatlabException(errorMessage);
 			}

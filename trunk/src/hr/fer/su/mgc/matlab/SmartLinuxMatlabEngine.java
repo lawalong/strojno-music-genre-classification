@@ -1,7 +1,5 @@
 package hr.fer.su.mgc.matlab;
 
-import hr.fer.su.mgc.matlab.MatlabEngine.MatlabException;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -18,9 +16,12 @@ public class SmartLinuxMatlabEngine extends SmartMatlabEngine {
 		engine.open();
 	}
 	
-	public double[] extractSongFeatures(File song) throws IOException, MatlabException, Exception {
+	public double[] extractSongFeatures(File song) throws Exception, MatlabException {
+		if(!song.exists()) 
+			throw new Exception(song.getAbsolutePath() + " does not exist!");
 		StringTokenizer st = 
-			new StringTokenizer(engine.evalString("disp(num2str([1:0.1:30]))"), " ");
+			new StringTokenizer(engine.evalString(
+					"disp(num2str(exSongFeatures('" + song.getAbsolutePath() + "')))"), " ");
 		
 		double[] result = new double[st.countTokens()];
 		int counter = 0;

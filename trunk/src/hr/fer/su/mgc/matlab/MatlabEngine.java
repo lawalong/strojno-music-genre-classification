@@ -15,10 +15,10 @@ public abstract class MatlabEngine {
 		String osType = System.getProperty("os.name");
 		if(osType.startsWith("Linux"))
 			return new LinuxMatlabEngine(matlabWorkDir);
-		else if(osType.startsWith("Windows"))
-			return new WindowsMatlabEngine(matlabWorkDir);
+//		else if(osType.startsWith("Windows"))
+//			return new WindowsMatlabEngine(matlabWorkDir);
 		else throw new UnsupportedOSException(
-				osType + " not supported. Only Linux and Windows are currently supported.");
+				osType + " not supported. Only Linux is currently supported.");
 	}
 	
 	public MatlabEngine(String matlabStartDir) {
@@ -43,14 +43,6 @@ public abstract class MatlabEngine {
 			super(errorMessage);
 		}
 		
-	}
-	
-	public class MatlabException extends Exception {
-		private static final long serialVersionUID = 1687200595982655087L;
-		
-		public MatlabException(String errorMessage) {
-			super(errorMessage);
-		}
 	}
 
 

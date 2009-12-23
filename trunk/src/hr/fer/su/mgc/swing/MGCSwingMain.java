@@ -1,5 +1,6 @@
 package hr.fer.su.mgc.swing;
 
+import hr.fer.su.mgc.Config;
 import hr.fer.su.mgc.audio.AudioFile;
 import hr.fer.su.mgc.swing.image.ImageUtils;
 
@@ -27,6 +28,7 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,6 +38,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -124,17 +127,34 @@ public class MGCSwingMain extends JFrame {
 		createMenus();
 		
 		setLayout(new BorderLayout());
+		JPanel rootPanel = new JPanel(new BorderLayout());
+		rootPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+		add(rootPanel);
 		
-		JPanel playerPanel = new JPanel(new BorderLayout());
-		playerPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-		add(playerPanel, BorderLayout.NORTH);
+		JTabbedPane tabPane = new JTabbedPane();
+		rootPanel.add(tabPane, BorderLayout.CENTER);
+		JPanel classifierPanel = new JPanel(new BorderLayout());
+		JPanel learnersPanel = new JPanel(new BorderLayout());
+		tabPane.add("Classifier", classifierPanel);
+		tabPane.add("Learning", learnersPanel);
 		
-		JPanel playerPanelInner = new JPanel();
-		playerPanel.add(playerPanelInner, BorderLayout.CENTER);
-		playerPanelInner.setLayout(new BoxLayout(playerPanelInner, BoxLayout.Y_AXIS));
-		playerPanelInner.setBorder(BorderFactory.createTitledBorder("Player"));
+		JPanel classifierNorth = new JPanel();
+		classifierNorth.setLayout(new BoxLayout(classifierNorth, BoxLayout.Y_AXIS));
+		classifierPanel.add(classifierNorth, BorderLayout.NORTH);
 		
+		JPanel selectHypPanel = new JPanel(new BorderLayout());
+		JPanel selectHypPanelInner = new JPanel();
+		selectHypPanelInner.setLayout(new BoxLayout(selectHypPanelInner, BoxLayout.X_AXIS));
+		selectHypPanelInner.add(new JLabel("<html><font size=+1>Select hypothesis: </font></html>"));
+		JComboBox hypCombo = new JComboBox(Config.getAllHypothesesNames());
+		selectHypPanelInner.add(hypCombo);
+		selectHypPanel.add(selectHypPanelInner, BorderLayout.WEST);
+		classifierNorth.add(selectHypPanel, BorderLayout.NORTH);
 		
+		JPanel playerPanel = new JPanel();
+		classifierNorth.add(playerPanel, BorderLayout.NORTH);
+		playerPanel.setLayout(new BoxLayout(playerPanel, BoxLayout.Y_AXIS));
+		playerPanel.setBorder(BorderFactory.createTitledBorder("Player"));
 		
 		JPanel browsePanel = new JPanel(new BorderLayout(8, 0));
 		browsePanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -170,14 +190,14 @@ public class MGCSwingMain extends JFrame {
 		
 		JButton browseButton = new JButton(browseAction);
 		browsePanel.add(browseButton, BorderLayout.EAST);
-		playerPanelInner.add(browsePanel);
+		playerPanel.add(browsePanel);
 		
 		
 		JPanel tagsPanel = new JPanel(new BorderLayout());
 		tagsPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		tagsPanel.add(tagLabel, BorderLayout.WEST);
 		tagsPanel.add(timeLabel, BorderLayout.EAST);
-		playerPanelInner.add(tagsPanel);
+		playerPanel.add(tagsPanel);
 		
 		JPanel sliderPanel = new JPanel(new BorderLayout());
 		sliderPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -208,7 +228,7 @@ public class MGCSwingMain extends JFrame {
 
 
 		sliderPanel.add(playerSlider, BorderLayout.CENTER);
-		playerPanelInner.add(sliderPanel);
+		playerPanel.add(sliderPanel);
 		
 		
 		JPanel buttonsPanel = new JPanel(new BorderLayout());
@@ -264,7 +284,7 @@ public class MGCSwingMain extends JFrame {
 		
 		buttonsPanel.add(buttonsPanelLeft, BorderLayout.WEST);
 		
-		playerPanelInner.add(buttonsPanel);
+		playerPanel.add(buttonsPanel);
 		
 	}
 	

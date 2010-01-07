@@ -99,7 +99,7 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 					matlabWorkDir.getAbsolutePath() + " does not exist!");
 		
 		command += "temp_file = fopen('" + tmpDataFile.getAbsolutePath() + "', 'w'); ";
-		command += "scriptName(temp_file";
+		command += scriptName + "(temp_file";
 		for(String arg : args) command += ", '" + arg + "'";
 		command += "); ";
 		command += "fclose(temp_file); quit(); ";

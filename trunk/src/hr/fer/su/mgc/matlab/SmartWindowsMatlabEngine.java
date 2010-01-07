@@ -75,19 +75,21 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 	public void close() {
 		// In Windows implementation we do nothing...
 	}
-	
-	
-	private void genTmpFile() throws IOException {
-		String name = "mgc_temp_" + (++tmpDataCounter) + ".data";
+
+	private void genTmpFile(String outputFileExtension) throws IOException {
+		String name = "mgc_temp_" + (++tmpDataCounter) + "." + outputFileExtension;
 		tmpDataFile = new File(
 				System.getProperty("java.io.tmpdir") + File.separator + name);
 	}
-
+	
+	private void genTmpFile() throws IOException {
+		genTmpFile("data");
+	}
 
 	@Override
-	public File runScript(String scriptName, String[] args) throws Exception {
+	public File runScript(String scriptName, String[] args, String outputFileExtension) throws Exception {
 		
-		genTmpFile();
+		genTmpFile(outputFileExtension);
 		
 		String command = "";
 		
@@ -116,6 +118,11 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 		}
 		
 		return tmpDataFile;
+	}
+	
+	@Override
+	public File runScript(String scriptName, String[] args) throws Exception {
+		return runScript(scriptName, args, "data");
 	}
 
 }

@@ -26,6 +26,7 @@ public abstract class SmartMatlabEngine {
 	public abstract double[] extractSongFeatures(File song) throws Exception, MatlabException;
 	
 	public abstract File runScript(String scriptName, String[] args) throws Exception;
+	public abstract File runScript(String scriptName, String[] args, String outputFileExtension) throws Exception;
 	
 	public abstract void close();
 

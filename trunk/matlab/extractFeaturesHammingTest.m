@@ -45,7 +45,7 @@ function extractFeaturesHammingTest( datasetpath, testname, genres, hammin, hamm
             ftrs1 = getTempo(d,sr);
             res = {};
             for i=1:hamn
-                res = [res, {getWindowedFeatures(d, sr, hamw(i), {@getSC, @getSF, @getSR, @getSTE, @getZCR})}];
+                res = [res, {getWindowedFeatures(d, sr, [hamw(i), hamw(i), hamw(i), hamw(i), hamw(i)], {@getSC, @getSF, @getSR, @getSTE, @getZCR})}];
             end
             mfcc = getMFCC(d,sr);
             [mn, md, mx, band] = getPower(d, sr, bn);

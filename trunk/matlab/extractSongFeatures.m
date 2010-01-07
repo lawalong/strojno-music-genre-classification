@@ -2,7 +2,7 @@ function features = extractSongFeatures( d, sr )
 %EXTRACTFEATURES extracts all the features of one audio file
 	bn = 24;
     features = getTempo(d,sr);
-    res = getWindowedFeatures(d, sr, 1, {@getSC, @getSF, @getSR, @getSTE, @getZCR});
+    res = getWindowedFeatures(d, sr, [1.0, 0.1, 0.1, 0.8, 1.0], {@getSC, @getSF, @getSR, @getSTE, @getZCR});
     mfcc = getMFCC(d,sr);
     [mn, md, mx, band] = getPower(d, sr, bn);
     for i=1:length(res); features = [features, std(res{i}), mean(res{i}), median(res{i}), max(res{i})]; end;

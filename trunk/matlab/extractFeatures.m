@@ -1,10 +1,10 @@
-function extractFeatures( datasetpath, testname, genres )
+function extractFeatures( stdout, datasetpath, testname, genres )
 %EXTRACTFEATURES extracts all the features of the audio database to a file
 %   testname = name of the feature set
 %   genres = which genres to include to extraction
 
     bn = 24;
-    fid = fopen(sprintf('extractedFeatures/%s.arff', testname), 'w');
+    fid = stdout;
     fprintf(fid, '@RELATION %s\r\n\r\n', testname);
     features = {'BPM1', 'BPM2', 'BPM1pow', 'stdSC', 'meanSC', 'medSC', 'maxSC', 'stdSF', 'meanSF', 'medSF', 'maxSF', 'stdSR', 'meanSR', 'medSR', 'maxSR', 'stdSTE', 'meanSTE', 'medSTE', 'maxSTE', 'stdZCR', 'meanZCR', 'medZCR', 'maxZCR'};
     for i=1:5; features=[features, sprintf('stdMFCC_%d', i), sprintf('meanMFCC_%d', i), sprintf('medianMFCC_%d', i), sprintf('maxMFCC_%d', i)]; end;
@@ -34,8 +34,12 @@ function extractFeatures( datasetpath, testname, genres )
     
     
     for genre = genres
-        for index = 0:99
-            [d,sr]=auread(sprintf('%s\\%s\\%s.%05d.au',datasetpath,genre{:},genre{:},index));
+        files = dir([datasetpath '/' genre{:}]);
+        for i = 1 : length(files)
+            filename = files(i).name;
+            if length(filename) < 3 || ~strcmp('.au', filename(length(filename)-2:length(filename))); continue; end;
+            [d,sr]=auread([datasetpath '/' genre{:} '/' filename]);
+            %[d,sr]=auread(sprintf('%s\\%s\\%s.%05d.au',datasetpath,genre{:},genre{:},index));
             ftrs = extractSongFeatures(d,sr);
             fprintf(fid, '%f, ', ftrs);
             fprintf(fid, '%s\r\n', genre{:});

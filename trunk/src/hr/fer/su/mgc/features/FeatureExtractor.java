@@ -1,6 +1,3 @@
-/**
- * 
- */
 package hr.fer.su.mgc.features;
 
 import hr.fer.su.mgc.Config;

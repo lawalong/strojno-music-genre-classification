@@ -107,6 +107,14 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 		matlabProcess = Runtime.getRuntime().exec(
 				"matlab -wait -nojvm -automation -r \"" + command + "\"");
 		
+		while(true) {
+			try {
+				if(matlabProcess.waitFor() != 0) 
+					throw new MatlabException("Some error ocurred in matlab...");
+				else break;
+			} catch (InterruptedException x) { continue; }
+		}
+		
 		return tmpDataFile;
 	}
 

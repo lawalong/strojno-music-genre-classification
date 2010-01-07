@@ -39,11 +39,9 @@ function extractFeatures( stdout, datasetpath, testname, genres )
             filename = files(i).name;
             if length(filename) < 3 || ~strcmp('.au', filename(length(filename)-2:length(filename))); continue; end;
             [d,sr]=auread([datasetpath '/' genre{:} '/' filename]);
-            %[d,sr]=auread(sprintf('%s\\%s\\%s.%05d.au',datasetpath,genre{:},genre{:},index));
             ftrs = extractSongFeatures(d,sr);
             fprintf(fid, '%f, ', ftrs);
             fprintf(fid, '%s\r\n', genre{:});
         end
     end
-    fclose(fid);
 end

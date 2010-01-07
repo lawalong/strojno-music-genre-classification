@@ -100,7 +100,7 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 		
 		command += "temp_file = fopen('" + tmpDataFile.getAbsolutePath() + "', 'w'); ";
 		command += scriptName + "(temp_file";
-		for(String arg : args) command += ", '" + arg + "'";
+		for(String arg : args) command += ", " + arg;
 		command += "); ";
 		command += "fclose(temp_file); quit(); ";
 		

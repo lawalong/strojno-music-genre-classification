@@ -3,9 +3,10 @@ function extractFeatures( stdout, datasetpath, testname, genres )
 %   testname = name of the feature set
 %   genres = which genres to include to extraction
 
-    bn = 24;
     fid = stdout;
     fprintf(fid, '@RELATION %s\r\n\r\n', testname);
+    
+    bn = 24;
     features = {'BPM1', 'BPM2', 'BPM1pow', 'stdSC', 'meanSC', 'medSC', 'maxSC', 'stdSF', 'meanSF', 'medSF', 'maxSF', 'stdSR', 'meanSR', 'medSR', 'maxSR', 'stdSTE', 'meanSTE', 'medSTE', 'maxSTE', 'stdZCR', 'meanZCR', 'medZCR', 'maxZCR'};
     for i=1:5; features=[features, sprintf('stdMFCC_%d', i), sprintf('meanMFCC_%d', i), sprintf('medianMFCC_%d', i), sprintf('maxMFCC_%d', i)]; end;
     features=[features, 'meanPower', 'medPower', 'maxPower'];

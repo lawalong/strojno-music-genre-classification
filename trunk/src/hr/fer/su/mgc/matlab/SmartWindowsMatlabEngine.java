@@ -34,7 +34,7 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 		String command = "";
 		
 		// Set user path if necessary...
-		if(matlabWorkDir != null) 
+		if(matlabWorkDir != null)
 			if(matlabWorkDir.exists())
 				command = "cd " + matlabWorkDir.getAbsolutePath() + "; ";
 			else throw new Exception("Start dir " + 
@@ -81,6 +81,30 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 		String name = "mgc_temp_" + (++tmpDataCounter) + ".data";
 		tmpDataFile = new File(
 				System.getProperty("java.io.tmpdir") + File.separator + name);
+	}
+
+
+	@Override
+	public File runScript(String scriptName, String[] args) throws Exception {
+		
+		genTmpFile();
+		
+		String command = "";
+		
+		// Set user path if necessary...
+		if(matlabWorkDir != null)
+			if(matlabWorkDir.exists())
+				command = "cd " + matlabWorkDir.getAbsolutePath() + "; ";
+			else throw new Exception("Start dir " + 
+					matlabWorkDir.getAbsolutePath() + " does not exist!");
+		
+		command += "temp_file = fopen('" + tmpDataFile.getAbsolutePath() + "', 'w'); ";
+		command += "scriptName(temp_file";
+		for(String arg : args) command += ", '" + arg + "'";
+		command += "); ";
+		command += "fclose(temp_file); quit(); ";
+		
+		return tmpDataFile;
 	}
 
 }

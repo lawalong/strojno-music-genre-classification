@@ -35,4 +35,10 @@ public class SmartLinuxMatlabEngine extends SmartMatlabEngine {
 		engine.close();
 	}
 
+	@Override
+	public File runScript(String scriptName, String[] args) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -17,15 +17,15 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class MGConverter {
 	
 	/**
+	 * Maximum concurrent thread count.
+	 */
+	public static final int THREAD_COUNT = 4;
+	
+	/**
 	 * Threshold for float comparisions. If the difference between two floats is
 	 * smaller than DELTA, they are considered equal.
 	 */
 	private static final float DELTA = 1E-9F;
-	
-	/**
-	 * Maximum concurrent thread count.
-	 */
-	protected static int threadCount;
 	
 	/**
 	 * List of active threads.
@@ -57,10 +57,9 @@ public class MGConverter {
 		
 		// Setting start params...
 		
-		threadCount = 4;
-		threads = new HashMap<Integer, Thread>(threadCount);
+		threads = new HashMap<Integer, Thread>(THREAD_COUNT);
 		
-		int desiredAudioLength = 1300000; // About 30 seconds...
+		int desiredAudioLength = 1323588; // About 30 seconds...
 		
 		int desiredChannels = 1; // MONO
 
@@ -180,9 +179,9 @@ public class MGConverter {
 						while(true) {
 							fileDone = false;
 							synchronized (threads) {
-								if(threads.size() < threadCount) {
+								if(threads.size() < THREAD_COUNT) {
 									// Grab number...
-									for(tmp = 0; tmp < threadCount; tmp++)
+									for(tmp = 0; tmp < THREAD_COUNT; tmp++)
 										if(threads.get(tmp) == null) break;
 
 									thread = new ConvThread(threads, Thread.currentThread(), 

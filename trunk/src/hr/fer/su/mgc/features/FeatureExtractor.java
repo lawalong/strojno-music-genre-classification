@@ -55,9 +55,8 @@ public class FeatureExtractor {
 	public File extractSongFeatures(File[] songList) throws Exception {
 		SmartMatlabEngine engine = SmartMatlabEngine.getInstance("matlab");
 		engine.open();
-		File features = engine
-				.runScript("extractSongsFeatures", new String[] {
-						serialize(songList), genres });
+		File features = engine.runScript("extractSongsFeatures",
+				new String[] { "'" + relation + "'", serialize(songList), genres });
 		engine.close();
 		return features;
 	}

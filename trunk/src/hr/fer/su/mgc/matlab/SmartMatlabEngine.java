@@ -38,7 +38,7 @@ public abstract class SmartMatlabEngine {
 	public abstract void close();
 	
 	public File runScript(String scriptName, String[] args) throws Exception {
-		return runScript(scriptName, args, "data");
+		return runScript(scriptName, args, "arff");
 	}
 	
 	public static SmartMatlabEngine getInstance(String matlabWorkDir)

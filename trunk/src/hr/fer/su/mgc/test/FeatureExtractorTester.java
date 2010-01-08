@@ -3,6 +3,7 @@
  */
 package hr.fer.su.mgc.test;
 
+import hr.fer.su.mgc.Config;
 import hr.fer.su.mgc.features.FeatureExtractor;
 
 import java.io.File;
@@ -17,6 +18,8 @@ public class FeatureExtractorTester {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
+		Config.init();
+		
 		FeatureExtractor featureExtractor = new FeatureExtractor(
 				new String[] { "blues", "classical", "country",
 						"disco", "hiphop", "jazz", "metal", "pop",

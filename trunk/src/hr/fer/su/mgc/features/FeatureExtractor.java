@@ -1,6 +1,5 @@
 package hr.fer.su.mgc.features;
 
-import hr.fer.su.mgc.Config;
 import hr.fer.su.mgc.matlab.MatlabException;
 import hr.fer.su.mgc.matlab.SmartMatlabEngine;
 
@@ -36,7 +35,6 @@ public class FeatureExtractor {
 	 */
 	public File extractDatasetFeatures(File datasetPath)
 			throws MatlabException, Exception {
-		Config.init();
 		SmartMatlabEngine engine = SmartMatlabEngine.getInstance("matlab");
 		engine.open();
 		File features = engine.runScript("extractFeatures", new String[] {
@@ -55,7 +53,6 @@ public class FeatureExtractor {
 	 * @throws Exception
 	 */
 	public File extractSongFeatures(File[] songList) throws Exception {
-		Config.init();
 		SmartMatlabEngine engine = SmartMatlabEngine.getInstance("matlab");
 		engine.open();
 		File features = engine

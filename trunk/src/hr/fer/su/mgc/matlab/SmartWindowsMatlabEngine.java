@@ -8,13 +8,7 @@ import java.util.StringTokenizer;
 
 public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 	
-	private File matlabWorkDir;
-	
 	private Process matlabProcess;
-	
-	private int tmpDataCounter;
-	
-	private File tmpDataFile;
 	
 	public void open() {
 		// In Windows implementation we do nothing...	
@@ -22,8 +16,7 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 	
 	
 	public SmartWindowsMatlabEngine(String matlabWorkDir) {
-		this.matlabWorkDir = new File(matlabWorkDir);
-		tmpDataCounter = 0;
+		super(matlabWorkDir);
 	}
 	
 	
@@ -76,17 +69,7 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 		// In Windows implementation we do nothing...
 	}
 
-	private void genTmpFile(String outputFileExtension) throws IOException {
-		String name = "mgc_temp_" + (++tmpDataCounter) + "." + outputFileExtension;
-		tmpDataFile = new File(
-				System.getProperty("java.io.tmpdir") + File.separator + name);
-	}
 	
-	private void genTmpFile() throws IOException {
-		genTmpFile("data");
-	}
-
-	@Override
 	public File runScript(String scriptName, String[] args, String outputFileExtension) throws Exception {
 		
 		genTmpFile(outputFileExtension);
@@ -118,11 +101,6 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 		}
 		
 		return tmpDataFile;
-	}
-	
-	@Override
-	public File runScript(String scriptName, String[] args) throws Exception {
-		return runScript(scriptName, args, "data");
 	}
 
 }

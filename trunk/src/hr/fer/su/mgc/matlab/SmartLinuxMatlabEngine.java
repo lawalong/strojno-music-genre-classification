@@ -9,6 +9,7 @@ public class SmartLinuxMatlabEngine extends SmartMatlabEngine {
 	private MatlabEngine engine;
 	
 	public SmartLinuxMatlabEngine(String matlabWorkDir) {
+		super(matlabWorkDir);
 		engine = new LinuxMatlabEngine(matlabWorkDir);
 	}
 	
@@ -34,18 +35,31 @@ public class SmartLinuxMatlabEngine extends SmartMatlabEngine {
 	public void close() {
 		engine.close();
 	}
-
-	@Override
-	public File runScript(String scriptName, String[] args) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
-	@Override
+	
 	public File runScript(String scriptName, String[] args,
-			String outputFileExtension) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+				String outputFileExtension) throws Exception {
+		
+		genTmpFile(outputFileExtension);
+		
+		String command = "";
+		
+		// Set user path if necessary...
+		if(matlabWorkDir != null)
+			if(matlabWorkDir.exists())
+				command = "cd " + matlabWorkDir.getAbsolutePath() + "; ";
+			else throw new Exception("Start dir " + 
+					matlabWorkDir.getAbsolutePath() + " does not exist!");
+		
+		command += "temp_file = fopen('" + tmpDataFile.getAbsolutePath() + "', 'w'); ";
+		command += scriptName + "(temp_file";
+		for(String arg : args) command += ", " + arg;
+		command += "); ";
+		command += "fclose(temp_file); quit(); ";
+		
+		engine.evalString(command);
+		
+		return tmpDataFile;
 	}
 
 }

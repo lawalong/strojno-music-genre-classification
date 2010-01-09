@@ -5,6 +5,7 @@ import hr.fer.su.mgc.classifier.exceptions.DataNotFoundException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,8 +18,10 @@ import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 
-public class ClassifierAdapter implements IClassifier {
-
+public class ClassifierAdapter implements IClassifier, Serializable {
+	private static final long serialVersionUID = 703168465236462289L;
+	
+	
 	private Boolean crossValidation;
 	private Instances trainSet;
 	private Instances testSet;

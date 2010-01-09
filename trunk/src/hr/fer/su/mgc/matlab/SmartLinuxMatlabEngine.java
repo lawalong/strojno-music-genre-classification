@@ -44,18 +44,11 @@ public class SmartLinuxMatlabEngine extends SmartMatlabEngine {
 		
 		String command = "";
 		
-		// Set user path if necessary...
-		if(matlabWorkDir != null)
-			if(matlabWorkDir.exists())
-				command = "cd " + matlabWorkDir.getAbsolutePath() + "; ";
-			else throw new Exception("Start dir " + 
-					matlabWorkDir.getAbsolutePath() + " does not exist!");
-		
 		command += "temp_file = fopen('" + tmpDataFile.getAbsolutePath() + "', 'w'); ";
 		command += scriptName + "(temp_file";
 		for(String arg : args) command += ", " + arg;
 		command += "); ";
-		command += "fclose(temp_file); quit(); ";
+		command += "fclose(temp_file); ";
 		
 		engine.evalString(command);
 		

@@ -27,6 +27,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -37,14 +38,22 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.FontUIResource;
+
+import org.jvnet.substance.SubstanceLookAndFeel;
+import org.jvnet.substance.skin.SubstanceBusinessBlueSteelLookAndFeel;
 
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
@@ -70,38 +79,52 @@ public class MGCSwingMain extends JFrame {
 	
 	public JLabel tagLabel;
 	public JLabel timeLabel;
-	public JTextField inputField;
+	public JTextField inputFieldL;
+	public JTextField inputFieldC;
 	public JSlider playerSlider;
+	
+	
+	// Learner vars...
+	
+	/**
+	 * Dataset dir.
+	 */
+	private File dataset;
+	
+	private JComboBox algCombo;
+	
+	private JComboBox crossValCombo;
+	
+	private JProgressBar progressBar;
 
+	/**
+	 * Output.
+	 */
+	private JTextArea output;
 	
 	
 	public MGCSwingMain() {
 		
 		frameRef = this;
 		
-		NimRODLookAndFeel NimRODLF = new NimRODLookAndFeel();
-
-		// NimRODLookAndFeel.setCurrentTheme(SSMUMain.makeNimrodTheme());
+		LookAndFeel lf = new SubstanceBusinessBlueSteelLookAndFeel();
 		
 		try {
-			UIManager.setLookAndFeel(NimRODLF);
+			UIManager.setLookAndFeel(lf);
+			SwingUtilities.updateComponentTreeUI(this);
 		} catch (Exception Ignorable) { }
 		
-//		try {
-//			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//		} catch (Exception Ignorable) { }
 		
-		@SuppressWarnings("unused")
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		setLocation(200, 200);
-		setSize(800, 300);
+		setLocation(100, 100);
+		setSize(screenSize.width - 200, screenSize.height - 200);
 		setMaximizedBounds(GraphicsEnvironment.
 				getLocalGraphicsEnvironment().getMaximumWindowBounds());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				// Do something...
+				// TODO: Do something...
 			}
 		});
 		setTitle("Music Genre Classifier");
@@ -119,17 +142,37 @@ public class MGCSwingMain extends JFrame {
 	private void initGUI() {
 		final MGCSwingMain mainRef = this;
 		
+		// Classifier vars...
+		
 		tagLabel = new JLabel();
 		timeLabel = new JLabel();
-		inputField = new JTextField();
+		inputFieldC = new JTextField();
 		playerSlider = new JSlider(JSlider.HORIZONTAL, 0, 0, 0);
+		
+		// Learner vars...
+		inputFieldL = new JTextField();
+		
 		
 		createMenus();
 		
 		setLayout(new BorderLayout());
-		JPanel rootPanel = new JPanel(new BorderLayout());
+		final JPanel rootPanel = new JPanel(new BorderLayout());
 		rootPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 		add(rootPanel);
+
+		NamedBorderedPanel outputPanel = new NamedBorderedPanel("Output", 8, 0, 0, 0) {
+			@Override
+			public void init() {
+				output = new JTextArea();
+				output.setEditable(false);
+				output.setBackground(rootPanel.getBackground());
+				this.panel.setLayout(new BorderLayout());
+				this.panel.add(new JScrollPane(output), BorderLayout.CENTER);
+				this.setPreferredSize(new Dimension(0, 150));
+				this.setMaximumSize(new Dimension(5000, 150));
+			}
+		};
+		rootPanel.add(outputPanel, BorderLayout.SOUTH);
 		
 		JTabbedPane tabPane = new JTabbedPane();
 		rootPanel.add(tabPane, BorderLayout.CENTER);
@@ -137,6 +180,88 @@ public class MGCSwingMain extends JFrame {
 		JPanel learnersPanel = new JPanel(new BorderLayout());
 		tabPane.add("Classifier", classifierPanel);
 		tabPane.add("Learning", learnersPanel);
+		
+		
+		// Init learner...
+		
+		JPanel learnerNorth = new JPanel();
+		learnerNorth.setLayout(new BoxLayout(learnerNorth, BoxLayout.Y_AXIS));
+		learnersPanel.add(learnerNorth, BorderLayout.NORTH);
+		
+		JPanel datasetPanel = new JPanel();
+		learnerNorth.add(datasetPanel, BorderLayout.NORTH);
+		datasetPanel.setLayout(new BoxLayout(datasetPanel, BoxLayout.Y_AXIS));
+		datasetPanel.setBorder(BorderFactory.createTitledBorder("Dataset Learner"));
+		
+		JPanel browsePanel = new JPanel(new BorderLayout(8, 0));
+		browsePanel.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
+		browsePanel.add(new JLabel("Dataset Path: "), BorderLayout.WEST);
+		browsePanel.add(inputFieldL, BorderLayout.CENTER);
+		
+		Action browseAction = new AbstractAction("Browse") {
+			public void actionPerformed(ActionEvent event) {
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				if (fileChooser.showOpenDialog(mainRef) == JFileChooser.APPROVE_OPTION) {
+					dataset = fileChooser.getSelectedFile();
+					inputFieldL.setText(dataset.getAbsolutePath());
+				}
+			}
+		};
+		browseAction.putValue(Action.SHORT_DESCRIPTION, "Select dataset path.");
+		
+		JButton browseButton = new JButton(browseAction);
+		browsePanel.add(browseButton, BorderLayout.EAST);
+		datasetPanel.add(browsePanel);
+		
+		
+		JPanel learnParams = new JPanel(new BorderLayout());
+		datasetPanel.add(learnParams);
+		learnParams.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
+		JPanel learnParamsLeft = new JPanel();
+		learnParams.add(learnParamsLeft, BorderLayout.CENTER);
+		learnParamsLeft.setLayout(new BoxLayout(learnParamsLeft, BoxLayout.X_AXIS));
+		
+		learnParamsLeft.add(new JLabel("Learning algorithm: "));
+		algCombo = new JComboBox(new String[] {"LogitBoost", "SMO"});
+		algCombo.setMaximumSize(new Dimension(100, 30));
+		algCombo.setSelectedIndex(1);
+		learnParamsLeft.add(algCombo);
+		learnParamsLeft.add(new JLabel("  Cross-Validation: "));
+		crossValCombo = new JComboBox(new String[] {"OFF", "2", "5", "10"});
+		crossValCombo.setMaximumSize(new Dimension(100, 30));
+		crossValCombo.setSelectedIndex(0);
+		learnParamsLeft.add(crossValCombo);
+
+		learnParams = new JPanel(new BorderLayout(8, 0));
+		datasetPanel.add(learnParams);
+		learnParams.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
+		
+		progressBar = new JProgressBar(0, 1050);
+//		progressBar.setIndeterminate(true);
+		progressBar.setValue(0);
+		progressBar.setStringPainted(true);
+
+		learnParams.add(progressBar, BorderLayout.CENTER);
+		
+		Action learnDataset = new AbstractAction("Learn") {
+			public void actionPerformed(ActionEvent event) {
+				if(audioFile != null) {
+					try {
+						// TODO
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(mainRef, "No line is available!", 
+								"Audio playback error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			}
+		};
+		learnDataset.putValue(Action.SHORT_DESCRIPTION, "Start learning.");
+		JButton learnButton = new JButton(learnDataset);
+		learnParams.add(learnButton, BorderLayout.EAST);
+		
+		
+		
+		// Init classifier...
 		
 		JPanel classifierNorth = new JPanel();
 		classifierNorth.setLayout(new BoxLayout(classifierNorth, BoxLayout.Y_AXIS));
@@ -156,11 +281,11 @@ public class MGCSwingMain extends JFrame {
 		playerPanel.setLayout(new BoxLayout(playerPanel, BoxLayout.Y_AXIS));
 		playerPanel.setBorder(BorderFactory.createTitledBorder("Player"));
 		
-		JPanel browsePanel = new JPanel(new BorderLayout(8, 0));
+		browsePanel = new JPanel(new BorderLayout(8, 0));
 		browsePanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		browsePanel.add(inputField, BorderLayout.CENTER);
+		browsePanel.add(inputFieldC, BorderLayout.CENTER);
 		
-		Action browseAction = new AbstractAction("Browse") {
+		browseAction = new AbstractAction("Browse") {
 			public void actionPerformed(ActionEvent event) {
 				int status = fileChooser.showOpenDialog(mainRef);
 
@@ -174,7 +299,7 @@ public class MGCSwingMain extends JFrame {
 						}
 						audioFile = new AudioFile(
 								selectedFile.getAbsolutePath(), mainRef);
-						inputField.setText(selectedFile.getName());
+						inputFieldC.setText(selectedFile.getName());
 					} catch (UnsupportedAudioFileException e) {
 						JOptionPane.showMessageDialog(mainRef, "Unsupported Audio File!", 
 								"Audio loading error", JOptionPane.ERROR_MESSAGE);
@@ -188,7 +313,7 @@ public class MGCSwingMain extends JFrame {
 		};
 		browseAction.putValue(Action.SHORT_DESCRIPTION, "Browse for audio file...");
 		
-		JButton browseButton = new JButton(browseAction);
+		browseButton = new JButton(browseAction);
 		browsePanel.add(browseButton, BorderLayout.EAST);
 		playerPanel.add(browsePanel);
 		
@@ -285,7 +410,6 @@ public class MGCSwingMain extends JFrame {
 		buttonsPanel.add(buttonsPanelLeft, BorderLayout.WEST);
 		
 		playerPanel.add(buttonsPanel);
-		
 	}
 	
 	/**
@@ -304,6 +428,30 @@ public class MGCSwingMain extends JFrame {
 		menuFile.add(exitMenuItem);
 		
 		menuBar.add(menuFile);
+		
+		
+		
+		JMenu menuLNF = new JMenu("l'n'f");
+		
+		ButtonGroup group = new ButtonGroup();
+		JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(actions.get("systemLNF"));
+		rbMenuItem.setMnemonic(KeyEvent.VK_S);
+		group.add(rbMenuItem);
+		menuLNF.add(rbMenuItem);
+		
+		rbMenuItem = new JRadioButtonMenuItem(actions.get("nimrodLNF"));
+		rbMenuItem.setMnemonic(KeyEvent.VK_N);
+		group.add(rbMenuItem);
+		menuLNF.add(rbMenuItem);
+		
+		rbMenuItem = new JRadioButtonMenuItem(actions.get("substanceLNF"));
+		rbMenuItem.setSelected(true);
+		rbMenuItem.setMnemonic(KeyEvent.VK_B);
+		group.add(rbMenuItem);
+		menuLNF.add(rbMenuItem);
+		
+		menuBar.add(menuLNF);
+		
 		
 		JMenu menuHelp = new JMenu("Help");
 		
@@ -325,26 +473,80 @@ public class MGCSwingMain extends JFrame {
 		
 		fileChooser = new JFileChooser(".");
 		
+		Action action;
+		
 		
 		// Menus actions...
 
-		Action fileExit = new AbstractAction("Exit") {
+		action = new AbstractAction("Exit") {
 			public void actionPerformed(ActionEvent event) {
 				System.exit(0);
 			}
 		};
-		fileExit.putValue(Action.SHORT_DESCRIPTION, "Exit application");
-		fileExit.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_X));
-		actions.put("Exit", fileExit);
+		action.putValue(Action.SHORT_DESCRIPTION, "Exit application");
+		action.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_X));
+		actions.put("Exit", action);
 		
-		Action helpAbout = new AbstractAction("About MGC") {
+		action = new AbstractAction("About MGC") {
 			public void actionPerformed(ActionEvent event) {
 				// TODO
 			}
 		};
-		helpAbout.putValue(Action.SHORT_DESCRIPTION, "About Music Genre Classifier");
-		helpAbout.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_A));
-		actions.put("helpAbout", helpAbout);
+		action.putValue(Action.SHORT_DESCRIPTION, "About Music Genre Classifier");
+		action.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_A));
+		actions.put("helpAbout", action);
+		
+		
+		action = new AbstractAction("System") {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+					SwingUtilities.updateComponentTreeUI(frameRef);
+				} catch (Throwable thr) {
+					JOptionPane.showMessageDialog(frameRef, 
+							"Error changing look and feel. " + thr.getLocalizedMessage(), 
+							"Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		};
+		action.putValue(Action.SHORT_DESCRIPTION, "Set default look and feel.");
+		action.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
+		actions.put("systemLNF", action);
+		
+		action = new AbstractAction("Nimrod") {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					NimRODLookAndFeel lf = new NimRODLookAndFeel();
+					UIManager.setLookAndFeel(lf);
+					SwingUtilities.updateComponentTreeUI(frameRef);
+				} catch (Throwable thr) {
+					JOptionPane.showMessageDialog(frameRef, 
+							"Error changing look and feel. " + thr.getLocalizedMessage(), 
+							"Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		};
+		action.putValue(Action.SHORT_DESCRIPTION, "Set Nimrod look and feel");
+		action.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
+		actions.put("nimrodLNF", action);
+		
+		action = new AbstractAction("Substance") {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					SubstanceLookAndFeel lf = 
+						new SubstanceBusinessBlueSteelLookAndFeel();
+					UIManager.setLookAndFeel(lf);
+					SwingUtilities.updateComponentTreeUI(frameRef);
+				} catch (Throwable thr) {
+					JOptionPane.showMessageDialog(frameRef, 
+							"Error changing look and feel. " + thr.getLocalizedMessage(), 
+							"Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		};
+		action.putValue(Action.SHORT_DESCRIPTION, "Set Substance look and feel");
+		action.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_B));
+		actions.put("substanceLNF", action);
 		
 		return actions;
 	}
@@ -373,6 +575,18 @@ public class MGCSwingMain extends JFrame {
 				// mainFrame.setExtendedState(mainFrame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 			}
 		});
+	}
+	
+	
+	public static void writeOut(String message, 
+			boolean errorFlag, MGCSwingMain frameRef) {
+		if(errorFlag) {
+			System.err.println(message);
+			frameRef.output.append("ERROR: " + message + "\n");
+		} else {
+			System.out.println(message);
+			frameRef.output.append(message + "\n");
+		}
 	}
 
 }

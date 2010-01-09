@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -85,6 +87,37 @@ public class Config {
 	public static String[] getAllHypothesesNames() {
 		if(hypotheses.size() == 0) return new String[0];
 		return (String[]) hypotheses.keySet().toArray();
+	}
+	
+	/**
+	 * Grab default genre array from internal dataset.
+	 * @return genre array
+	 * @throws Exception in case dataset path doesn't exist 
+	 * or is not a directory
+	 */
+	public static String[] grabGenres() throws Exception {
+		return grabGenres(new File("./dataset"));
+	}
+	
+	/**
+	 * Returns genres array from specified dataset
+	 * @param datasetPath dataset path
+	 * @return genre array
+	 * @throws Exception in case dataset path doesn't exist 
+	 * or is not a directory
+	 */
+	public static String[] grabGenres(File datasetPath) throws Exception {
+		List<String> tmpList = new ArrayList<String>();
+		
+		if(datasetPath.isDirectory()) throw new Exception("Dataset path is invalid!");
+		
+		for(File genre : datasetPath.listFiles())
+			if(genre.isDirectory()) tmpList.add(genre.getName());
+		
+		String[] ret = new String[tmpList.size()];
+		for(int i = 0; i < tmpList.size(); i++) ret[i] = tmpList.get(i);
+		
+		return ret;
 	}
 
 }

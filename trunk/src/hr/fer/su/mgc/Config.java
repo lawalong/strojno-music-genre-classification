@@ -1,14 +1,17 @@
 package hr.fer.su.mgc;
 
+import hr.fer.su.mgc.classifier.ClassifierAdapter;
+
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 public class Config {
 	
@@ -60,7 +63,7 @@ public class Config {
 		
 		hypotheses = new HashMap<String, File>();
 		
-		for(File hypFile : new File("hypotheses").listFiles())
+		for(File hypFile : new File("hypothesis").listFiles())
 			if(hypFile.isFile()) hypotheses.put(hypFile.getName(), hypFile);
 	}
 	
@@ -68,25 +71,28 @@ public class Config {
 		return hypotheses.get(name);
 	}
 
-	public static double[] getHypothesis(String name) throws IOException {
+	public static ClassifierAdapter getHypothesis(String name) throws Exception {
+		return loadHypothesis(hypotheses.get(name));
+	}
+	
+	public static ClassifierAdapter loadHypothesis(File hypothesis) throws Exception {
 		
 		// Read hypotheses file...
-		BufferedReader tmpReader = new BufferedReader(new FileReader(hypotheses.get(name)));
-		String retVal = tmpReader.readLine(); // We expect all in one line...
-		tmpReader.close();
+		ObjectInputStream input = 
+			new ObjectInputStream(new FileInputStream(hypothesis));
 		
-		StringTokenizer st = new StringTokenizer(retVal, " ");
+		ClassifierAdapter weka = (ClassifierAdapter) input.readObject();
+		input.close();
 		
-		double[] result = new double[st.countTokens()];
-		int counter = 0;
-		while(st.hasMoreTokens()) result[counter++] = Double.valueOf(st.nextToken());
-		
-		return result;
+		return weka;
 	}
 	
 	public static String[] getAllHypothesesNames() {
 		if(hypotheses.size() == 0) return new String[0];
-		return (String[]) hypotheses.keySet().toArray();
+		String[] ret = new String[hypotheses.size()];
+		int i = 0;
+		for(String name : hypotheses.keySet()) ret[i++] = name;
+		return ret;
 	}
 	
 	/**

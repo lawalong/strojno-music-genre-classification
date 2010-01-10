@@ -16,6 +16,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JLabel;
+import javax.swing.JSlider;
 
 import org.tritonus.share.sampled.TAudioFormat;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
@@ -63,52 +64,61 @@ public class AudioFile {
 				baseFormat.getSampleRate(), 16, baseFormat.getChannels(),
 				baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
 		inputStream.close();
-
-		// TAudioFileFormat properties
+		
+		
+		// Load metadata...
+		
+		Integer duration = null; String title = null, author = null, genre = null;
+		
 		if (baseFileFormat instanceof TAudioFileFormat) {
 			Map properties = ((TAudioFileFormat) baseFileFormat).properties();
-			int length = Integer.valueOf(properties.get("duration").toString());
-
-			// Setting maximum in miliseconds...
-			mainRef.playerSlider.setMaximum(length / 1000);
 			
-			String title = null, author = null, genre = null;
+			// Grab duration in ms
+			
 			try {
-				title = properties.get("title").toString();
-				author = properties.get("author").toString();
-				genre = properties.get("mp3.id3tag.genre").toString();
-				
+				duration = Integer.valueOf(properties.get("duration").toString())/1000;
 			} catch (Exception Ignorable) { }
 			
-			if (title == null)
-				title = "Unknown";
-			if (author == null)
-				author = "Unknown";
-			if (genre == null)
-				genre = "Unknown";
-
-			mainRef.tagLabel.setText("<html><font size=+2><b>" + title
-					+ "</b></font> by " + author + " [" + genre + "]</html>");
+			try {
+				title = properties.get("title").toString();
+			} catch (Exception Ignorable) { }
+			
+			try {
+				author = properties.get("author").toString();
+			} catch (Exception Ignorable) { }
+			try {
+				genre = properties.get("mp3.id3tag.genre").toString();
+			} catch (Exception Ignorable) { }
 
 		} else if (baseFormat instanceof TAudioFormat) {
 			Map properties = ((TAudioFormat) baseFormat).properties();
-			int length = Integer.valueOf(properties.get("duration").toString());
-			// Setting maximum in miliseconds...
-			mainRef.playerSlider.setMaximum(length / 1000);
+			duration = Integer.valueOf(properties.get("duration").toString());
 		
-		} else {
-
-			// Setting maximum in miliseconds...
-			mainRef.playerSlider.setMaximum((int)
-					(audioFile.length()/(baseFormat.getFrameSize()*baseFormat.getFrameRate())*1000));
 		}
 		
-		mainRef.playerSlider.setMajorTickSpacing(mainRef.playerSlider.getMaximum()/8);
-		mainRef.playerSlider.setMinorTickSpacing(mainRef.playerSlider.getMajorTickSpacing()/5);
+		if(duration == null) duration = (int) 
+			((baseFileFormat.getFrameLength() / baseFormat.getFrameRate())*1000);
+		if(title == null || title.equals("")) title = "Unknown";
+		if(author == null || author.equals("")) author = "Unknown";
+		if(genre == null || genre.equals("")) genre = "Unknown";
+		
+		JLabel tagLabel = mainRef.getPlayerPanel().getTagLabel();
+		JSlider slider = mainRef.getPlayerPanel().getPlayerSlider();
+		
+		// Set duration in ms
+		slider.setMaximum(duration);
+		
+		// Set tag label
+		tagLabel.setText("<html><b>" + title
+				+ "</b> by " + author + " [" + genre + "]</html>");
+
+		
+		slider.setMajorTickSpacing(slider.getMaximum()/8);
+		slider.setMinorTickSpacing(slider.getMajorTickSpacing()/5);
 
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-		for (int i = mainRef.playerSlider.getMinimum(); i <= mainRef.playerSlider
-				.getMaximum(); i += mainRef.playerSlider.getMajorTickSpacing()) {
+		for (int i = slider.getMinimum(); 
+			i <= slider.getMaximum(); i += slider.getMajorTickSpacing()) {
 
 			int secs = i / 1000, mins = 0;
 			while (secs >= 60) {
@@ -119,8 +129,7 @@ public class AudioFile {
 			labelTable.put(i, new JLabel(String.valueOf(mins) + ":"
 					+ ((secs < 10) ? "0" + secs : secs)));
 		}
-		mainRef.playerSlider.setLabelTable(labelTable);
-
+		slider.setLabelTable(labelTable);
 	}
 	
 	private void playInit(MGCSwingMain mainRef) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
@@ -242,10 +251,12 @@ public class AudioFile {
 
 	class PlaybackThread extends Thread {
 		
+		public static final int BUFFER_SIZE = 16384;
+		
 		private byte[] data;
 
 		public PlaybackThread() {
-			data = new byte[8192];
+			data = new byte[BUFFER_SIZE];
 		}
 
 		@Override
@@ -294,10 +305,11 @@ public class AudioFile {
 
 		@Override
 		public void run() {
+			JSlider slider = mainRef.getPlayerPanel().getPlayerSlider();
 			while(true) {
 				switch(state) {
 				case 0: 
-					mainRef.playerSlider.setValue(0);
+					slider.setValue(0);
 					return;
 				case 1:
 					while(state == 1) {
@@ -310,13 +322,13 @@ public class AudioFile {
 						}
 					}
 					if(state == 0) {
-						mainRef.playerSlider.setValue(0);
+						slider.setValue(0);
 						return;
 					}
 					break;
 				}
 //				mainRef.timeLabel.setText(text)
-				mainRef.playerSlider.setValue((int)(line.getMicrosecondPosition()/1000));
+				slider.setValue((int)(line.getMicrosecondPosition()/1000));
 				try {
 					Thread.sleep(80);
 				} catch (InterruptedException Ignorable) { }

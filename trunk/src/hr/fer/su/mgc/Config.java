@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,10 +116,12 @@ public class Config {
 	public static String[] grabGenres(File datasetPath) throws Exception {
 		List<String> tmpList = new ArrayList<String>();
 		
-		if(datasetPath.isDirectory()) throw new Exception("Dataset path is invalid!");
+		if(!datasetPath.isDirectory()) throw new Exception("Dataset path is invalid!");
 		
 		for(File genre : datasetPath.listFiles())
 			if(genre.isDirectory()) tmpList.add(genre.getName());
+		
+		Collections.sort(tmpList);
 		
 		String[] ret = new String[tmpList.size()];
 		for(int i = 0; i < tmpList.size(); i++) ret[i] = tmpList.get(i);

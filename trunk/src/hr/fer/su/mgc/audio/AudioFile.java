@@ -25,6 +25,10 @@ public class AudioFile {
 	
 	private File audioFile;
 	
+	public File getAudioFile() {
+		return audioFile;
+	}
+
 	private AudioInputStream inputStream;
 	private AudioInputStream decodedInputStream;
 	
@@ -175,10 +179,10 @@ public class AudioFile {
 			switch(state) {
 			case 0:
 				playInit(mainRef);
-				line.start();
 				state = 2;
 				sliderThread.start();
 				playback.start();
+				line.start();
 				break;
 			case 1:
 				line.start();

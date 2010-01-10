@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -45,6 +46,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
 import org.jvnet.substance.SubstanceLookAndFeel;
 import org.jvnet.substance.skin.SubstanceBusinessBlueSteelLookAndFeel;
 
@@ -76,7 +84,19 @@ public class MGCSwingMain extends JFrame {
 	public PlayerPanel getPlayerPanel() {
 		return playerPanel;
 	}
+	
+	/**
+	 * HypothesisLoader referece.
+	 */
+	protected HypothesisLoader hypLoader;
 
+	public HypothesisLoader getHypLoader() {
+		return hypLoader;
+	}
+	
+	protected JPanel classifierNorth;
+	
+	protected JPanel chartPanel;
 
 	public JTextField inputFieldL;
 	
@@ -176,19 +196,20 @@ public class MGCSwingMain extends JFrame {
 	
 	@SuppressWarnings("serial")
 	private void initClassifierTab(JTabbedPane tabPane) {
+		final MGCSwingMain mainRef = this;
 		
 		JPanel classifierPanel = new JPanel(new BorderLayout());
-		tabPane.add("Classifier", classifierPanel);
+		tabPane.add("Classifier", new JScrollPane(classifierPanel));
 
-		JPanel classifierNorth = new JPanel();
+		classifierNorth = new JPanel();
 		classifierNorth.setLayout(new BoxLayout(classifierNorth, BoxLayout.Y_AXIS));
 		classifierPanel.add(classifierNorth, BorderLayout.NORTH);
-		
-		final HypothesisLoader hypLoader = new HypothesisLoader(this, fileChooser);
+
 		NamedBorderedPanel hypPanel = new NamedBorderedPanel("Hypothesis Loader", 16, 4, 8, 4) {
 			@Override
 			public void init() {
 				this.panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+				hypLoader = new HypothesisLoader(mainRef, fileChooser);
 				this.panel.add(hypLoader);
 			}
 		};
@@ -421,6 +442,64 @@ public class MGCSwingMain extends JFrame {
 		} else {
 			System.out.println(message);
 			output.append(message + "\n");
+		}
+	}
+	
+	public void updateCharts(String[] genres, double[] result, int index) {
+		if(genres.length != result.length) {
+			writeOut("Error generating charts. " +
+					"Genres and Result must have equal length.", true);
+			return;
+		}
+		
+		removeCharts();
+		
+		int i;
+		
+		// Create Pie Chart ...
+		
+		DefaultPieDataset pieDataset = new DefaultPieDataset();
+		for(i = 0; i < genres.length; i++)
+			pieDataset.setValue(genres[i], result[i]);
+		
+		JFreeChart chart = ChartFactory.createPieChart(genres[index], pieDataset, true, true, false);
+		PiePlot plot = (PiePlot) chart.getPlot();
+		plot.setCircular(true);
+		plot.setBackgroundAlpha(0.1f);
+		final JPanel piePanel = new ChartPanel(chart);
+		
+        // Create Bar Chart ...
+		
+		DefaultCategoryDataset barDataset = new DefaultCategoryDataset();
+		for(i = 0; i < genres.length; i++)
+			barDataset.addValue(result[i], genres[i], "");
+		
+		chart = ChartFactory.createBarChart(
+				genres[index], "Žanrovi", "Postotak", barDataset, PlotOrientation.VERTICAL, true, true, false);
+		
+		chart.getPlot().setBackgroundAlpha(0.1f);
+		final JPanel barPanel = new ChartPanel(chart, true);
+		
+		chartPanel = new NamedBorderedPanel("Classification results", 8, 4, 16, 4) {
+			private static final long serialVersionUID = 6228148692395703978L;
+
+			@Override
+			public void init() {
+				this.panel.setLayout(new GridLayout(1, 2, 16, 0));
+				this.panel.add(piePanel);
+				this.panel.add(barPanel);
+			}
+		};
+		
+		classifierNorth.add(chartPanel);
+		
+		classifierNorth.repaint();
+	}
+	
+	public void removeCharts() {
+		if(chartPanel != null) {
+			classifierNorth.remove(chartPanel);
+			chartPanel = null;
 		}
 	}
 	

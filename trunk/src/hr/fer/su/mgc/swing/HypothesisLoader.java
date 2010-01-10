@@ -21,9 +21,17 @@ public class HypothesisLoader extends JPanel {
 	
 	private ClassifierAdapter classifier;
 	
+	public ClassifierAdapter getClassifier() {
+		return classifier;
+	}
+	
 	private JComboBox hypCombo;
 	
 	private JLabel displayLabel;
+	
+	public JLabel getDisplayLabel() {
+		return displayLabel;
+	}
 	
 	@SuppressWarnings("serial")
 	public HypothesisLoader(final MGCSwingMain mainRef, final JFileChooser fileChooser) {
@@ -92,17 +100,8 @@ public class HypothesisLoader extends JPanel {
 		}
 	}
 	
-	public boolean fileLoaded() {
+	public boolean hypothesisLoaded() {
 		return classifier != null;
-	}
-	
-
-	public ClassifierAdapter getClassifier() {
-		return classifier;
-	}
-
-	public JLabel getDisplayLabel() {
-		return displayLabel;
 	}
 
 }

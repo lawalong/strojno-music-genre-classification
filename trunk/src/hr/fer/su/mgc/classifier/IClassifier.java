@@ -17,6 +17,10 @@ import weka.classifiers.Evaluation;
  */
 public interface IClassifier {
 	
+	public static final int NO_VALIDATION = 0;
+	public static final int TEST_SET_VALIDATION = 1;
+	public static final int CROSS_VALIDATION = 2;
+	
 	/**
 	 * Postavlja podatke za učenje. 
 	 * Ukoliko se želi napraviti krovalidacija, potrebno je postaviti 
@@ -26,13 +30,6 @@ public interface IClassifier {
 	 * @throws DataNotFoundException ako uslijede problemi s čitanjem datoteke
 	 */
 	public void setTrainData(File dataFile) throws DataNotFoundException;
-	
-	/**
-	 * Odabire vrstu testiranja klasifikatora.
-	 * @param value <b>true</b> za krosvalidaciju (default), <b>false</b> ako ćemo učiti nad
-	 * svim podacima (potrebo je učitati podatke za testiranje!)
-	 */
-	public void enableCrossValidation(Boolean value);
 	
 	/**
 	 * Postavlja podatke za učenje.
@@ -61,4 +58,12 @@ public interface IClassifier {
 	 */
 	public List<double[]> classifyInstances(File unclassified) throws DataNotFoundException;
 	
+	/**
+	 * Sets classifier validation flag.<br>
+	 * NO_VALIDATION, TEST_SET_VALIDATION, CROSS_VALIDATION
+	 * are currently supported.
+	 * @param value <b>true</b> za krosvalidaciju (default), <b>false</b> ako ćemo učiti nad
+	 * svim podacima (potrebo je učitati podatke za testiranje!)
+	 */
+	public void setValidation(int validation);
 }

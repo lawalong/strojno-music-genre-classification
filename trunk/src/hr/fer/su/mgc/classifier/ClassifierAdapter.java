@@ -21,10 +21,20 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class ClassifierAdapter implements IClassifier, Serializable {
 	private static final long serialVersionUID = 703168465236462289L;
 	
+	private int validation;
 	
-	private Boolean crossValidation;
+	public int getValidation() {
+		return validation;
+	}
+
+	public void setValidation(int validation) {
+		this.validation = validation;
+	}
+
 	private Instances trainSet;
+	
 	private Instances testSet;
+	
 	private Classifier classifier;
 	
 	/**
@@ -34,8 +44,8 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 	 * @param type vrsta klasifikatora koji se koristi (popis u ClassifierConstants)
 	 * @throws Exception ukoliko podešavanje opcija ne uspije.
 	 */
-	public ClassifierAdapter(Integer type) throws Exception{
-		crossValidation = true;
+	public ClassifierAdapter(Integer type) throws Exception {
+		validation = 0;
 		
 		switch(type){
 		case ClassifierConstants.LogitBoost: 	classifier = initLogitBoost(); 	break;
@@ -60,17 +70,33 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		return smo;
 	}
 	
+	public Evaluation buildModel() throws Exception {
+		return buildModel(null);
+	}
+	
 	@Override
 	public Evaluation buildModel(Integer folds) throws Exception {
 		if(trainSet == null) throw new DataNotFoundException("Train set was not loaded.");
 		classifier.buildClassifier(trainSet);
-		Evaluation eval = new Evaluation(trainSet);
-		if(crossValidation)
-			eval.crossValidateModel(classifier, trainSet, folds, new Random(1));
-		else{
+		
+		Evaluation eval = null;
+		switch (validation) {
+		case NO_VALIDATION:
+			// Do nothing...
+			break;
+
+		case TEST_SET_VALIDATION:
+			eval = new Evaluation(trainSet);
 			if(testSet == null) throw new DataNotFoundException("Test set was not loaded.");
 			eval.evaluateModel(classifier, testSet);
+			break;
+			
+		case CROSS_VALIDATION:
+			eval = new Evaluation(trainSet);
+			eval.crossValidateModel(classifier, trainSet, folds, new Random(1));
+			break;
 		}
+		
 		return eval;
 	}
 
@@ -94,11 +120,7 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		}
 		
 	}
-
-	@Override
-	public void enableCrossValidation(Boolean value) {
-		crossValidation = value;
-	}
+	
 
 	@Override
 	public void setTestData(File dataFile) throws DataNotFoundException {

@@ -1,6 +1,9 @@
 package hr.fer.su.mgc.swing;
 
+import hr.fer.su.mgc.Config;
 import hr.fer.su.mgc.audio.AudioFile;
+import hr.fer.su.mgc.classifier.ClassifierAdapter;
+import hr.fer.su.mgc.features.FeatureExtractor;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -71,7 +74,7 @@ public class PlayerPanel extends JPanel {
 		
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-		mainPanel.setBorder(BorderFactory.createTitledBorder("Audio Player"));
+		mainPanel.setBorder(BorderFactory.createTitledBorder("Audio Loader"));
 		add(mainPanel, BorderLayout.CENTER);
 		
 		
@@ -161,9 +164,17 @@ public class PlayerPanel extends JPanel {
 		
 		// Init buttons...
 		
-		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-		buttonsPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		JPanel buttonsPanel = new JPanel();
+		buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
 		mainPanel.add(buttonsPanel);
+		
+		JPanel buttonsPanelLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+		buttonsPanelLeft.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		buttonsPanel.add(buttonsPanelLeft);
+		
+		JPanel buttonsPanelRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
+		buttonsPanelRight.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		buttonsPanel.add(buttonsPanelRight);
 		
 		Action playerPlay = new AbstractAction("Play") {
 			public void actionPerformed(ActionEvent event) {
@@ -185,7 +196,7 @@ public class PlayerPanel extends JPanel {
 		};
 		playerPlay.putValue(Action.SHORT_DESCRIPTION, "Start playback");
 		JButton playButton = new JButton(playerPlay);
-		buttonsPanel.add(playButton);
+		buttonsPanelLeft.add(playButton);
 
 		
 		Action playerPause = new AbstractAction("Pause") {
@@ -197,7 +208,7 @@ public class PlayerPanel extends JPanel {
 		};
 		playerPause.putValue(Action.SHORT_DESCRIPTION, "Pause playback");
 		JButton pauseButton = new JButton(playerPause);
-		buttonsPanel.add(pauseButton);
+		buttonsPanelLeft.add(pauseButton);
 		
 		
 		Action playerStop = new AbstractAction("Stop") {
@@ -209,7 +220,56 @@ public class PlayerPanel extends JPanel {
 		};
 		playerStop.putValue(Action.SHORT_DESCRIPTION, "Stop playback");
 		JButton stopButton = new JButton(playerStop);
-		buttonsPanel.add(stopButton);
+		buttonsPanelLeft.add(stopButton);
+		
+		Action classify = new AbstractAction("Classify") {
+			public void actionPerformed(ActionEvent event) {
+				if(audioFile != null && mainRef.getHypLoader().hypothesisLoaded()) {
+					try {
+						String[] genres = Config.grabGenres();
+						
+						FeatureExtractor featureExtractor = new FeatureExtractor(genres);
+						
+						File song = featureExtractor.extractSongFeatures(
+								new File[] {audioFile.getAudioFile()});
+						
+						ClassifierAdapter classifier = mainRef.getHypLoader().getClassifier();
+						
+						long time = System.currentTimeMillis();
+
+						double[] result = classifier.classifyInstances(song).get(0);
+						
+						mainRef.writeOut("Classification completed in " + 
+								((System.currentTimeMillis() - time)/1000f) + " seconds.", false);
+						
+						StringBuilder sb = new StringBuilder();
+						double max = 0; int ind = -1;
+						for (int i = 0; i < result.length; ++i) {
+							sb.append(String.format("%.3f ", result[i]));
+							if (max < result[i]) {
+								max = result[i];
+								ind = i;
+							}
+						}
+						
+						mainRef.updateCharts(genres, result, ind);
+
+						mainRef.writeOut(sb.toString() + "-> " + genres[ind], false);
+						
+					} catch (Throwable e) {
+						String message = 
+							"Error ocurred trying to classify audio file. " + e.getLocalizedMessage();
+						JOptionPane.showMessageDialog(mainRef, message, 
+								"Classification Error", JOptionPane.ERROR_MESSAGE);
+						mainRef.writeOut(message, true);
+					}
+
+				}
+			}
+		};
+		classify.putValue(Action.SHORT_DESCRIPTION, "Classify audio genre.");
+		JButton classifyButton = new JButton(classify);
+		buttonsPanelRight.add(classifyButton);
 		
 	}
 

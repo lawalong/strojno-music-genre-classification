@@ -9,6 +9,7 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -33,9 +34,17 @@ public class HypothesisLoader extends JPanel {
 		return displayLabel;
 	}
 	
+	private JPanel genresPanel;
+	
 	@SuppressWarnings("serial")
 	public HypothesisLoader(final MGCSwingMain mainRef, final JFileChooser fileChooser) {
-		setLayout(new FlowLayout(FlowLayout.LEFT, 8, 4));
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		
+		
+		// Top panel...
+		
+		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+		add(panel);
 		
 		String[] tmp = Config.getAllHypothesesNames();
 		String[] hyps = new String[tmp.length+1];
@@ -43,7 +52,7 @@ public class HypothesisLoader extends JPanel {
 		hyps[0] = "[FILE]";
 		
 		hypCombo = new JComboBox(hyps);
-		add(hypCombo);
+		panel.add(hypCombo);
 		
 		Action browseAction = new AbstractAction("Load") {
 			public void actionPerformed(ActionEvent event) {
@@ -54,6 +63,7 @@ public class HypothesisLoader extends JPanel {
 						try {
 							classifier = Config.loadHypothesis(selectedFile);
 							displayLabel.setText(selectedFile.getName());
+							initGenresPanel();
 						} catch (Exception e) {
 							String message = "Error loading hypothesis " + 
 								selectedFile.getName() + ". " + e.getLocalizedMessage();
@@ -67,6 +77,7 @@ public class HypothesisLoader extends JPanel {
 					try {
 						classifier = Config.getHypothesis(selection);
 						displayLabel.setText(selection);
+						initGenresPanel();
 					} catch (Exception e) {
 						String message = "Error loading hypothesis " + 
 							selection + ". " + e.getLocalizedMessage();
@@ -79,12 +90,12 @@ public class HypothesisLoader extends JPanel {
 		};
 		
 		JButton loadButton = new JButton(browseAction);
-		add(loadButton);
+		panel.add(loadButton);
 		
-		add(new JLabel("Hypothesis:"));
+		panel.add(new JLabel("Hypothesis:"));
 		
 		displayLabel = new JLabel("None<");
-		add(displayLabel);
+		panel.add(displayLabel);
 
 		hypCombo.setSelectedIndex(0);
 		
@@ -94,10 +105,29 @@ public class HypothesisLoader extends JPanel {
 				classifier = Config.getHypothesis(hyps[1]);
 				displayLabel.setText(hyps[1]);
 				hypCombo.setSelectedIndex(1);
+				initGenresPanel();
 			} catch (Exception e) {
 				System.err.println("Error loading classifer: " + hyps[1]);
 			}
 		}
+		
+		
+	}
+	
+	private void initGenresPanel() {
+		if(genresPanel != null) remove(genresPanel);
+		if(classifier != null) {
+			genresPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+			add(genresPanel);
+			
+			StringBuilder sb = new StringBuilder();
+			String[] genres = classifier.getGenres();
+			if(genres.length > 0) sb.append(genres[0]);
+			for(int i = 1; i < genres.length; i++) sb.append(", " + genres[i]);
+			
+			genresPanel.add(new JLabel("<html><b>Genres: </b>" + sb.toString() + "</html>"));
+		}
+
 	}
 	
 	public boolean hypothesisLoaded() {

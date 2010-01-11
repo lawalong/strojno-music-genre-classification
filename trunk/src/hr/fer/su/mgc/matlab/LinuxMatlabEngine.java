@@ -135,6 +135,7 @@ public class LinuxMatlabEngine extends MatlabEngine {
 	
 	public void close() {
 		try {
+			evalString("quit();");
 			reader.close();
 			errReader.close();
 			writer.close();

@@ -21,11 +21,11 @@ public class TestingClassifiers {
 		
 		
 		//podesiti putanju do uzoraka
-		File samples = new File("D:/Data/allFeatures.arff");
+		File samples = new File("data/allFeatures.arff");
 		
 		ClassifierAdapter smo = new ClassifierAdapter(ClassifierConstants.LogitBoost);
 		smo.setTrainData(samples);
-		Evaluation eval = smo.buildModel(10); // 10-fold krosvalidacija
+		Evaluation eval = smo.buildModel(null); // 10-fold krosvalidacija
 		//ispisuje općenite statistike testiranja
 		System.out.println(eval.toSummaryString());
 		

@@ -21,6 +21,16 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class ClassifierAdapter implements IClassifier, Serializable {
 	private static final long serialVersionUID = 703168465236462289L;
 	
+	private String[] genres;
+	
+	public String[] getGenres() {
+		return genres;
+	}
+
+	public void setGenres(String[] genres) {
+		this.genres = genres;
+	}
+
 	private int validation;
 	
 	public int getValidation() {

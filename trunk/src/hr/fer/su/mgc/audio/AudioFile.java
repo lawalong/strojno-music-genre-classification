@@ -97,7 +97,6 @@ public class AudioFile {
 		} else if (baseFormat instanceof TAudioFormat) {
 			Map properties = ((TAudioFormat) baseFormat).properties();
 			duration = Integer.valueOf(properties.get("duration").toString());
-		
 		}
 		
 		if(duration == null) duration = (int) 
@@ -143,12 +142,21 @@ public class AudioFile {
 		baseFileFormat = AudioSystem.getAudioFileFormat(audioFile);
 		baseFormat = baseFileFormat.getFormat();
 		
-		decodedFormat = new AudioFormat(
-				AudioFormat.Encoding.PCM_SIGNED,
-				baseFormat.getSampleRate(), 16, baseFormat.getChannels(),
-				baseFormat.getChannels() * 2, baseFormat.getSampleRate(),
-				false);
-		decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat, inputStream);
+
+		DataLine.Info info = new DataLine.Info(SourceDataLine.class,
+				baseFormat, AudioSystem.NOT_SPECIFIED);
+		if(AudioSystem.isLineSupported(info)) {
+			decodedFormat = baseFormat;
+			decodedInputStream = inputStream;
+		}
+		else {
+			decodedFormat = new AudioFormat(
+					AudioFormat.Encoding.PCM_SIGNED,
+					baseFormat.getSampleRate(), 16, baseFormat.getChannels(),
+					baseFormat.getChannels() * 2, baseFormat.getSampleRate(),
+					false);
+			decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat, inputStream);
+		}
 		
 		line = getLine(decodedFormat);
 		
@@ -179,10 +187,10 @@ public class AudioFile {
 			switch(state) {
 			case 0:
 				playInit(mainRef);
+				line.start();
 				state = 2;
 				sliderThread.start();
 				playback.start();
-				line.start();
 				break;
 			case 1:
 				line.start();

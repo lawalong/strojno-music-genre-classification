@@ -42,6 +42,7 @@ public class FeatureExtractorTester {
 		File samples = new File("data/allFeatures.arff");
 
 		ClassifierAdapter smo = new ClassifierAdapter(ClassifierConstants.SMO);
+		smo.setGenres(genres);
 		smo.setTrainData(samples);
 		smo.setTestData(samples);
 		smo.setValidation(IClassifier.NO_VALIDATION);

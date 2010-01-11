@@ -112,6 +112,8 @@ public class MGCSwingMain extends JFrame {
 	private JComboBox crossValCombo;
 	
 	private JProgressBar progressBar;
+	
+	protected JScrollPane classifierScroll;
 
 	/**
 	 * Output.
@@ -199,7 +201,9 @@ public class MGCSwingMain extends JFrame {
 		final MGCSwingMain mainRef = this;
 		
 		JPanel classifierPanel = new JPanel(new BorderLayout());
-		tabPane.add("Classifier", new JScrollPane(classifierPanel));
+		classifierScroll = new JScrollPane(classifierPanel);
+		classifierScroll.getVerticalScrollBar().setUnitIncrement(16);
+		tabPane.add("Classifier", classifierScroll);
 
 		classifierNorth = new JPanel();
 		classifierNorth.setLayout(new BoxLayout(classifierNorth, BoxLayout.Y_AXIS));
@@ -438,11 +442,14 @@ public class MGCSwingMain extends JFrame {
 	public void writeOut(String message, boolean errorFlag) {
 		if(errorFlag) {
 			System.err.println(message);
-			output.append("ERROR: " + message + "\n");
+			output.append(message + "\n");
 		} else {
 			System.out.println(message);
 			output.append(message + "\n");
 		}
+		
+		output.setCaretPosition(output.getDocument().getLength());
+
 	}
 	
 	public void updateCharts(String[] genres, double[] result, int index) {
@@ -451,8 +458,6 @@ public class MGCSwingMain extends JFrame {
 					"Genres and Result must have equal length.", true);
 			return;
 		}
-		
-		removeCharts();
 		
 		int i;
 		
@@ -480,20 +485,29 @@ public class MGCSwingMain extends JFrame {
 		chart.getPlot().setBackgroundAlpha(0.1f);
 		final JPanel barPanel = new ChartPanel(chart, true);
 		
+		if(chartPanel != null) classifierNorth.remove(chartPanel);
+		
 		chartPanel = new NamedBorderedPanel("Classification results", 8, 4, 16, 4) {
 			private static final long serialVersionUID = 6228148692395703978L;
 
 			@Override
 			public void init() {
-				this.panel.setLayout(new GridLayout(1, 2, 16, 0));
-				this.panel.add(piePanel);
-				this.panel.add(barPanel);
+				this.panel.setLayout(new BorderLayout());
+				JPanel innerPanel = new JPanel(new GridLayout(1, 2, 16, 0));
+				innerPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+				this.panel.add(innerPanel, BorderLayout.CENTER);
+
+				innerPanel.add(piePanel);
+				innerPanel.add(barPanel);
 			}
 		};
 		
 		classifierNorth.add(chartPanel);
 		
-		classifierNorth.repaint();
+		classifierNorth.revalidate();
+		
+		classifierScroll.getVerticalScrollBar().setValue(
+				classifierScroll.getVerticalScrollBar().getMaximum());
 	}
 	
 	public void removeCharts() {
@@ -501,6 +515,9 @@ public class MGCSwingMain extends JFrame {
 			classifierNorth.remove(chartPanel);
 			chartPanel = null;
 		}
+		
+		classifierNorth.invalidate();
+		classifierNorth.repaint();
 	}
 	
 	public static void writeOut(String message, 

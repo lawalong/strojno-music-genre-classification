@@ -37,9 +37,8 @@ public class HypothesisLoader extends JPanel {
 	private JPanel genresPanel;
 	
 	@SuppressWarnings("serial")
-	public HypothesisLoader(final MGCSwingMain mainRef, final JFileChooser fileChooser) {
+	public HypothesisLoader(final MGCSwingMain mainRef) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		
 		
 		// Top panel...
 		
@@ -58,8 +57,8 @@ public class HypothesisLoader extends JPanel {
 			public void actionPerformed(ActionEvent event) {
 				String selection = hypCombo.getSelectedItem().toString();
 				if(selection.equals("[FILE]")) {
-					if (fileChooser.showOpenDialog(mainRef) == JFileChooser.APPROVE_OPTION) {
-						File selectedFile = fileChooser.getSelectedFile();
+					if (mainRef.getFileChooser().showOpenDialog(mainRef) == JFileChooser.APPROVE_OPTION) {
+						File selectedFile = mainRef.getFileChooser().getSelectedFile();
 						try {
 							classifier = Config.loadHypothesis(selectedFile);
 							displayLabel.setText(selectedFile.getName());

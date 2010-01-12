@@ -76,6 +76,10 @@ public class MGCSwingMain extends JFrame {
 	 */
 	protected JFileChooser fileChooser;
 	
+	public JFileChooser getFileChooser() {
+		return fileChooser;
+	}
+
 	/**
 	 * PlayerPanel reference.
 	 */
@@ -213,14 +217,14 @@ public class MGCSwingMain extends JFrame {
 			@Override
 			public void init() {
 				this.panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-				hypLoader = new HypothesisLoader(mainRef, fileChooser);
+				hypLoader = new HypothesisLoader(mainRef);
 				this.panel.add(hypLoader);
 			}
 		};
 		
 		classifierNorth.add(hypPanel);
 		
-		playerPanel = new PlayerPanel(this, fileChooser, 8, 4, 8, 4);
+		playerPanel = new PlayerPanel(this, 8, 4, 8, 4);
 		classifierNorth.add(playerPanel);
 	}
 
@@ -390,6 +394,7 @@ public class MGCSwingMain extends JFrame {
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 					SwingUtilities.updateComponentTreeUI(frameRef);
+					reInitFileChooser();
 				} catch (Throwable thr) {
 					JOptionPane.showMessageDialog(frameRef, 
 							"Error changing look and feel. " + thr.getLocalizedMessage(), 
@@ -407,6 +412,7 @@ public class MGCSwingMain extends JFrame {
 					NimRODLookAndFeel lf = new NimRODLookAndFeel();
 					UIManager.setLookAndFeel(lf);
 					SwingUtilities.updateComponentTreeUI(frameRef);
+					reInitFileChooser();
 				} catch (Throwable thr) {
 					JOptionPane.showMessageDialog(frameRef, 
 							"Error changing look and feel. " + thr.getLocalizedMessage(), 
@@ -425,6 +431,7 @@ public class MGCSwingMain extends JFrame {
 						new SubstanceBusinessBlueSteelLookAndFeel();
 					UIManager.setLookAndFeel(lf);
 					SwingUtilities.updateComponentTreeUI(frameRef);
+					reInitFileChooser();
 				} catch (Throwable thr) {
 					JOptionPane.showMessageDialog(frameRef, 
 							"Error changing look and feel. " + thr.getLocalizedMessage(), 
@@ -437,6 +444,10 @@ public class MGCSwingMain extends JFrame {
 		actions.put("substanceLNF", action);
 		
 		return actions;
+	}
+	
+	private void reInitFileChooser() {
+		fileChooser = new JFileChooser(fileChooser.getCurrentDirectory());
 	}
 	
 	public void writeOut(String message, boolean errorFlag) {

@@ -75,8 +75,7 @@ public class PlayerPanel extends JPanel {
 	
 
 	@SuppressWarnings("serial")
-	public PlayerPanel(final MGCSwingMain mainRef, final JFileChooser fileChooser, 
-			int top, int left, int bottom, int right) {
+	public PlayerPanel(final MGCSwingMain mainRef, int top, int left, int bottom, int right) {
 		super(new BorderLayout());
 		
 		tagLabel = new JLabel();
@@ -99,10 +98,9 @@ public class PlayerPanel extends JPanel {
 		
 		Action action = new AbstractAction("Load") {
 			public void actionPerformed(ActionEvent event) {
-				int status = fileChooser.showOpenDialog(mainRef);
 
-				if (status == JFileChooser.APPROVE_OPTION) {
-					File selectedFile = fileChooser.getSelectedFile();
+				if (mainRef.getFileChooser().showOpenDialog(mainRef) == JFileChooser.APPROVE_OPTION) {
+					File selectedFile = mainRef.getFileChooser().getSelectedFile();
 					try {
 						if(audioFile != null) {
 							tagLabel.setText("");

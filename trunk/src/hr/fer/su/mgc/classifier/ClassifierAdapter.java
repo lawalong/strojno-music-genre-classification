@@ -75,7 +75,7 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 	private SMO initSMO() throws Exception{
 		SMO smo = new SMO();
 		smo.setOptions(Utils.splitOptions(
-				"-C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -K \"" +
+				"-C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -M -V -1 -W 1 -K \"" +
 		"weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 2.0\""));
 		return smo;
 	}

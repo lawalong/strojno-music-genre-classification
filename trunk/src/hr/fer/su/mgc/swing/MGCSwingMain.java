@@ -144,7 +144,7 @@ public class MGCSwingMain extends JFrame {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				// TODO: Do something...
+				System.exit(0);
 			}
 		});
 		setTitle("Music Genre Classifier");

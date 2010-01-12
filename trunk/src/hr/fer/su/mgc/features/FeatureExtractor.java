@@ -1,5 +1,6 @@
 package hr.fer.su.mgc.features;
 
+import hr.fer.su.mgc.MGC;
 import hr.fer.su.mgc.matlab.MatlabException;
 import hr.fer.su.mgc.matlab.SmartMatlabEngine;
 
@@ -53,11 +54,8 @@ public class FeatureExtractor {
 	 * @throws Exception
 	 */
 	public File extractSongFeatures(File[] songList) throws Exception {
-		SmartMatlabEngine engine = SmartMatlabEngine.getInstance("matlab");
-		engine.open();
-		File features = engine.runScript("extractSongsFeatures",
+		File features = MGC.getMatlabEngine().runScript("extractSongsFeatures",
 				new String[] { "'" + relation + "'", serialize(songList), genres });
-		engine.close();
 		return features;
 	}
 

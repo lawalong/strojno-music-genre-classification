@@ -14,6 +14,10 @@ public class SmartWindowsMatlabEngine extends SmartMatlabEngine {
 		// In Windows implementation we do nothing...	
 	}
 	
+	public boolean started() {
+		return true;
+	}
+	
 	
 	public SmartWindowsMatlabEngine(String matlabWorkDir) {
 		super(matlabWorkDir);

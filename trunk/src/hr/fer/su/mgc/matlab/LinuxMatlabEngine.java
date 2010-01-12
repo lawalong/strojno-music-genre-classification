@@ -17,6 +17,8 @@ public class LinuxMatlabEngine extends MatlabEngine {
 	private char[] outputBuffer;
 	private StringBuffer outputStringBuffer;
 	private static final int BUFFERSIZE = 65536;
+	
+	private boolean openedflag;
 
 	public LinuxMatlabEngine(String matlabStartDir) {
 		super(matlabStartDir);
@@ -49,10 +51,16 @@ public class LinuxMatlabEngine extends MatlabEngine {
 				else throw new Exception("Start dir " + 
 						matlabWorkDir.getAbsolutePath() + " does not exist!");
 			
+			openedflag = true;
+			
 		} catch (IOException ex) {
 			System.err.println("ERROR: Matlab could not be opened. " + ex.getMessage());
 			throw (ex);
 		}
+	}
+	
+	public boolean started() {
+		return openedflag;
 	}
 
 	private void send(String str) throws IOException {
@@ -135,14 +143,13 @@ public class LinuxMatlabEngine extends MatlabEngine {
 	
 	public void close() {
 		try {
-			send("quit();");
 			reader.close();
 			errReader.close();
 			writer.close();
 			matlabProcess.destroy();
+			openedflag = false;
 		} catch (Throwable Ignorable) { }
 	}
-	
 
 
 }

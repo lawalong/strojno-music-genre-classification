@@ -31,6 +31,11 @@ public abstract class SmartMatlabEngine {
 	
 	public abstract void open() throws Exception, IOException, MatlabException;
 	
+	/**
+	 * @return true if matlab engine is open.
+	 */
+	public abstract boolean started();
+	
 	public abstract double[] extractSongFeatures(File song) throws Exception, MatlabException;
 	
 	public abstract File runScript(String scriptName, String[] args, String outputFileExtension) throws Exception;

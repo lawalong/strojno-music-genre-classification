@@ -17,6 +17,11 @@ public class SmartLinuxMatlabEngine extends SmartMatlabEngine {
 		engine.open();
 	}
 	
+	
+	public boolean started() {
+		return engine.started();
+	}
+	
 	public double[] extractSongFeatures(File song) throws Exception, MatlabException {
 		if(!song.exists()) 
 			throw new Exception(song.getAbsolutePath() + " does not exist!");

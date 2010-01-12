@@ -27,6 +27,11 @@ public abstract class MatlabEngine {
 	
 	public abstract void open() throws Exception, IOException, MatlabException;
 	
+	/**
+	 * @return true if matlab engine is open.
+	 */
+	public abstract boolean started();
+	
 	public abstract String evalString(String str) throws Exception, IOException, MatlabException;
 	
 	public abstract void close();

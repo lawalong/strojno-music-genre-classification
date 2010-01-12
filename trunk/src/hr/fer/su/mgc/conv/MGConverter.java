@@ -2,6 +2,7 @@ package hr.fer.su.mgc.conv;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -13,6 +14,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import javazoom.jl.decoder.Bitstream;
 
 public class MGConverter {
 	
@@ -125,16 +128,42 @@ public class MGConverter {
 						
 						try {
 							inputStream = AudioSystem.getAudioInputStream(audioFile);
-						} catch (UnsupportedAudioFileException ex) {
+						} catch (UnsupportedAudioFileException e1) {
 							writeOut(System.err, "Unsupported audio file: " + 
 									audioFile.getName() + ". Skipping...");
 							continue;
-						} catch (IOException ex) {
-							writeOut(System.err, "IO exception occurred while opening: " + 
-									audioFile.getName() + ". Skipping...");
-							continue;
+						} catch (IOException e1) {
+							
+							FileInputStream fileIn;
+							try {
+								fileIn = new FileInputStream(audioFile);
+								Bitstream m = new Bitstream(fileIn);
+								long start = m.header_pos();
+
+								// Need to open the stream again
+								try { m.close(); } catch(Exception ex2) { ex2.printStackTrace(); }
+								fileIn = new FileInputStream(audioFile);
+
+								// Skip the header
+								fileIn.skip(start);
+							} catch (IOException e2) {
+								writeOut(System.err, "IO exception occurred while opening: " + 
+										audioFile.getName() + ". Skipping...");
+								continue;
+							}
+							
+							try {
+								inputStream = AudioSystem.getAudioInputStream(fileIn);
+							} catch (IOException e) {
+								writeOut(System.err, "IO exception occurred while opening: " + 
+										audioFile.getName() + ". Skipping...");
+								continue;
+							} catch (UnsupportedAudioFileException e) {
+								writeOut(System.err, "IO exception occurred while opening: " + 
+										audioFile.getName() + ". Skipping...");
+								continue;
+							}
 						}
-						
 						
 						sourceFileFormat = AudioSystem.getAudioFileFormat(audioFile);
 						sourceFormat = sourceFileFormat.getFormat();

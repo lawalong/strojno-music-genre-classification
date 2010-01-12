@@ -24,6 +24,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -61,8 +62,18 @@ public class PlayerPanel extends JPanel {
 	public JLabel getDisplayLabel() {
 		return displayLabel;
 	}
-
 	
+	private JProgressBar classifierProgressBar;
+	
+	public JProgressBar getClassifierProgressBar() {
+		return classifierProgressBar;
+	}
+
+	public void setClassifierProgressBar(JProgressBar classifierProgressBar) {
+		this.classifierProgressBar = classifierProgressBar;
+	}
+	
+
 	@SuppressWarnings("serial")
 	public PlayerPanel(final MGCSwingMain mainRef, final JFileChooser fileChooser, 
 			int top, int left, int bottom, int right) {
@@ -168,16 +179,20 @@ public class PlayerPanel extends JPanel {
 		// Init buttons...
 		
 		JPanel buttonsPanel = new JPanel();
-		buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
+		buttonsPanel.setLayout(new BorderLayout());
 		mainPanel.add(buttonsPanel);
 		
 		JPanel buttonsPanelLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
 		buttonsPanelLeft.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		buttonsPanel.add(buttonsPanelLeft);
+		buttonsPanel.add(buttonsPanelLeft, BorderLayout.WEST);
+		
+		JPanel buttonsCenter = new JPanel(new BorderLayout());
+		buttonsCenter.setBorder(BorderFactory.createEmptyBorder(8, 4, 8, 4));
+		buttonsPanel.add(buttonsCenter, BorderLayout.CENTER);
 		
 		JPanel buttonsPanelRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
 		buttonsPanelRight.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		buttonsPanel.add(buttonsPanelRight);
+		buttonsPanel.add(buttonsPanelRight, BorderLayout.EAST);
 		
 		Action playerPlay = new AbstractAction("Play") {
 			public void actionPerformed(ActionEvent event) {
@@ -225,9 +240,19 @@ public class PlayerPanel extends JPanel {
 		JButton stopButton = new JButton(playerStop);
 		buttonsPanelLeft.add(stopButton);
 		
+
+		classifierProgressBar = new JProgressBar();
+		classifierProgressBar.setIndeterminate(true);
+		classifierProgressBar.setValue(0);
+		classifierProgressBar.setStringPainted(true);
+		buttonsCenter.add(classifierProgressBar, BorderLayout.CENTER);
+		
 		Action classify = new AbstractAction("Classify") {
 			public void actionPerformed(ActionEvent event) {
 				if(audioFile != null && mainRef.getHypLoader().hypothesisLoaded()) {
+					classifierProgressBar.setValue(0);
+					if(classifierProgressBar.isIndeterminate())
+						classifierProgressBar.setIndeterminate(false);
 					new ClassificationThread().start();
 				}
 			}
@@ -268,12 +293,16 @@ public class PlayerPanel extends JPanel {
 						mainRef.writeOut("CLASSIFICATION: Prepared audio for classification in " + 
 								((System.currentTimeMillis()-time)/1000f) + " seconds.", false);
 						
+						updateSlider(40);
+						
 						time = System.currentTimeMillis();
 						
 						File song = featureExtractor.extractSongFeatures(new File[] {tempFile});
 						
 						mainRef.writeOut("CLASSIFICATION: Extracted features from audio in " + 
 								((System.currentTimeMillis()-time)/1000f) + " seconds.", false);
+						
+						updateSlider(80);
 						
 						if(tempFile.exists()) tempFile.delete();
 						
@@ -285,6 +314,8 @@ public class PlayerPanel extends JPanel {
 						
 						mainRef.writeOut("CLASSIFICATION: Classification completed in " + 
 								((System.currentTimeMillis() - time)/1000f) + " seconds.", false);
+						
+						updateSlider(90);
 						
 						StringBuilder sb = new StringBuilder();
 						double max = 0; int ind = -1;
@@ -310,6 +341,8 @@ public class PlayerPanel extends JPanel {
 						    }
 						});
 						
+						updateSlider(100);
+						
 					} catch (Throwable e) {
 						final String message = 
 							"CLASSIFICATION ERROR: Error ocurred trying " +
@@ -325,6 +358,17 @@ public class PlayerPanel extends JPanel {
 						mainRef.writeOut(message, true);
 					}
 					super.run();
+				}
+				
+				private void updateSlider(final int percentage) {
+					try {
+						SwingUtilities.invokeAndWait(new Runnable() {
+							@Override
+							public void run() {
+								classifierProgressBar.setValue(percentage);
+							}
+						});
+					} catch (Throwable Ignorable) { }
 				}
 				
 			}

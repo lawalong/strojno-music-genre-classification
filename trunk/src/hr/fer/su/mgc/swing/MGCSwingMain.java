@@ -111,7 +111,7 @@ public class MGCSwingMain extends JFrame {
 	
 	private JComboBox crossValCombo;
 	
-	private JProgressBar progressBar;
+	private JProgressBar learnerProgressBar;
 	
 	protected JScrollPane classifierScroll;
 
@@ -283,12 +283,12 @@ public class MGCSwingMain extends JFrame {
 		datasetPanel.add(learnParams);
 		learnParams.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
 		
-		progressBar = new JProgressBar(0, 1050);
+		learnerProgressBar = new JProgressBar(0, 1050);
 //		progressBar.setIndeterminate(true);
-		progressBar.setValue(0);
-		progressBar.setStringPainted(true);
+		learnerProgressBar.setValue(0);
+		learnerProgressBar.setStringPainted(true);
 
-		learnParams.add(progressBar, BorderLayout.CENTER);
+		learnParams.add(learnerProgressBar, BorderLayout.CENTER);
 		
 		Action learnDataset = new AbstractAction("Learn") {
 			public void actionPerformed(ActionEvent event) {

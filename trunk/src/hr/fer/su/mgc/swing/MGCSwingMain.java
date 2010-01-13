@@ -1,6 +1,8 @@
 package hr.fer.su.mgc.swing;
 
 import hr.fer.su.mgc.Config;
+import hr.fer.su.mgc.classifier.ClassifierAdapter;
+import hr.fer.su.mgc.classifier.ClassifierConstants;
 import hr.fer.su.mgc.swing.image.ImageUtils;
 
 import java.awt.BorderLayout;
@@ -14,7 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -35,7 +36,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -90,40 +90,40 @@ public class MGCSwingMain extends JFrame {
 	}
 	
 	/**
-	 * HypothesisLoader referece.
+	 * ClassifierLoader referece.
 	 */
-	protected HypothesisLoader hypLoader;
+	protected ClassifierLoader classifierLoader;
+	
+	protected ClassifierLoader classifierLoaderL;
+	
+	protected FeatureLoader featureLoader;
 
-	public HypothesisLoader getHypLoader() {
-		return hypLoader;
+	public ClassifierLoader getClassifierLoader() {
+		return classifierLoader;
 	}
 	
 	protected JPanel classifierNorth;
+	
+	protected JPanel learnerNorth;
 	
 	protected JPanel chartPanel;
 
 	public JTextField inputFieldL;
 	
-	// Learner vars...
-	
-	/**
-	 * Dataset dir.
-	 */
-	private File dataset;
-	
-	private JComboBox algCombo;
-	
-	private JComboBox crossValCombo;
-	
-	private JProgressBar learnerProgressBar;
-	
 	protected JScrollPane classifierScroll;
+	
+	protected JScrollPane learnerScroll;
 
 	/**
 	 * Output.
 	 */
 	private JTextArea output;
 	
+	
+	
+	// Learning tab components...
+	
+	protected JPanel classifierBuilder;
 	
 	
 	
@@ -213,18 +213,18 @@ public class MGCSwingMain extends JFrame {
 		classifierNorth.setLayout(new BoxLayout(classifierNorth, BoxLayout.Y_AXIS));
 		classifierPanel.add(classifierNorth, BorderLayout.NORTH);
 
-		NamedBorderedPanel hypPanel = new NamedBorderedPanel("Hypothesis Loader", 16, 4, 8, 4) {
+		NamedBorderedPanel classLoaderPanel = new NamedBorderedPanel("Classifier Loader", 16, 8, 8, 8) {
 			@Override
 			public void init() {
 				this.panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-				hypLoader = new HypothesisLoader(mainRef);
-				this.panel.add(hypLoader);
+				classifierLoader = new ClassifierLoader(mainRef, false, true);
+				this.panel.add(classifierLoader);
 			}
 		};
 		
-		classifierNorth.add(hypPanel);
+		classifierNorth.add(classLoaderPanel);
 		
-		playerPanel = new PlayerPanel(this, 8, 4, 8, 4);
+		playerPanel = new PlayerPanel(this, 8, 8, 8, 8);
 		classifierNorth.add(playerPanel);
 	}
 
@@ -232,76 +232,94 @@ public class MGCSwingMain extends JFrame {
 	private void initLearningTab(JTabbedPane tabPane) { // TODO
 		final MGCSwingMain mainRef = this;
 		
-		JPanel learnersPanel = new JPanel(new BorderLayout());
-		tabPane.add("Learning", learnersPanel);
-		
-		JPanel learnerNorth = new JPanel();
+		JPanel learnerPanel = new JPanel(new BorderLayout());
+		learnerScroll = new JScrollPane(learnerPanel);
+		learnerScroll.getVerticalScrollBar().setUnitIncrement(16);
+		tabPane.add("Learning", learnerScroll);
+
+		learnerNorth = new JPanel();
 		learnerNorth.setLayout(new BoxLayout(learnerNorth, BoxLayout.Y_AXIS));
-		learnersPanel.add(learnerNorth, BorderLayout.NORTH);
-		
-		JPanel datasetPanel = new JPanel();
-		learnerNorth.add(datasetPanel, BorderLayout.NORTH);
-		datasetPanel.setLayout(new BoxLayout(datasetPanel, BoxLayout.Y_AXIS));
-		datasetPanel.setBorder(BorderFactory.createTitledBorder("Dataset Learner"));
-		
-		JPanel browsePanel = new JPanel(new BorderLayout(8, 0));
-		browsePanel.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
-		browsePanel.add(new JLabel("Dataset Path: "), BorderLayout.WEST);
-		browsePanel.add(inputFieldL, BorderLayout.CENTER);
-		
-		Action browseAction = new AbstractAction("Browse") {
-			public void actionPerformed(ActionEvent event) {
-				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				if (fileChooser.showOpenDialog(mainRef) == JFileChooser.APPROVE_OPTION) {
-					dataset = fileChooser.getSelectedFile();
-					inputFieldL.setText(dataset.getAbsolutePath());
-				}
+		learnerPanel.add(learnerNorth, BorderLayout.NORTH);
+
+		NamedBorderedPanel panel = new NamedBorderedPanel("Feature Loader", 16, 8, 8, 8) {
+			@Override
+			public void init() {
+				this.panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+				featureLoader = new FeatureLoader(mainRef);
+				this.panel.add(featureLoader);
 			}
 		};
-		browseAction.putValue(Action.SHORT_DESCRIPTION, "Select dataset path.");
 		
-		JButton browseButton = new JButton(browseAction);
-		browsePanel.add(browseButton, BorderLayout.EAST);
-		datasetPanel.add(browsePanel);
+		learnerNorth.add(panel);
 		
 		
-		JPanel learnParams = new JPanel(new BorderLayout());
-		datasetPanel.add(learnParams);
-		learnParams.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
-		JPanel learnParamsLeft = new JPanel();
-		learnParams.add(learnParamsLeft, BorderLayout.CENTER);
-		learnParamsLeft.setLayout(new BoxLayout(learnParamsLeft, BoxLayout.X_AXIS));
-		
-		learnParamsLeft.add(new JLabel("Learning algorithm: "));
-		algCombo = new JComboBox(new String[] {"LogitBoost", "SMO"});
-		algCombo.setMaximumSize(new Dimension(100, 30));
-		algCombo.setSelectedIndex(1);
-		learnParamsLeft.add(algCombo);
-		learnParamsLeft.add(new JLabel("  Cross-Validation: "));
-		crossValCombo = new JComboBox(new String[] {"OFF", "2", "5", "10"});
-		crossValCombo.setMaximumSize(new Dimension(100, 30));
-		crossValCombo.setSelectedIndex(0);
-		learnParamsLeft.add(crossValCombo);
-
-		learnParams = new JPanel(new BorderLayout(8, 0));
-		datasetPanel.add(learnParams);
-		learnParams.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
-		
-		learnerProgressBar = new JProgressBar(0, 1050);
-//		progressBar.setIndeterminate(true);
-		learnerProgressBar.setValue(0);
-		learnerProgressBar.setStringPainted(true);
-
-		learnParams.add(learnerProgressBar, BorderLayout.CENTER);
-		
-		Action learnDataset = new AbstractAction("Learn") {
-			public void actionPerformed(ActionEvent event) {
-				// TODO
+		classifierBuilder = new NamedBorderedPanel("Classifier Builder", 8, 8, 8, 8) {
+			
+			protected JComboBox classTypesCombo;
+			
+			@Override
+			public void init() {
+				this.panel.setLayout(new BorderLayout());
+				
+				JPanel panelLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+				JPanel panelCenter = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+				this.panel.add(panelLeft, BorderLayout.WEST);
+				this.panel.add(panelCenter, BorderLayout.CENTER);
+				
+				panelLeft.add(new JLabel("<html><b>Build Classifier:</b></html>"));
+				
+				classTypesCombo = new JComboBox(new String[] {"LogitBoost", "SMO"});
+				panelLeft.add(classTypesCombo);
+				
+				Action action = new AbstractAction("Build") {
+					public void actionPerformed(ActionEvent event) {
+						
+						if(!featureLoader.featuresLoaded()) {
+							String message = "No loaded features!";
+							JOptionPane.showMessageDialog(mainRef, message, 
+									"Error building classifier", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+						
+						try {
+							String selection = classTypesCombo.getSelectedItem().toString();
+							ClassifierAdapter classifier;
+							if(selection.equals("LogitBoost")) {
+								classifier = new ClassifierAdapter(ClassifierConstants.LogitBoost);
+							} else if(selection.equals("SMO")) {
+								classifier = new ClassifierAdapter(ClassifierConstants.SMO);
+							} else return;
+							classifier.setTrainData(featureLoader.getFeatures());
+							classifier.buildModel();
+							
+							// Update Classifier loader...
+							classifierLoaderL.loadCustomClassifier(classifier);
+							
+						} catch (Exception e) {
+							String message = "Error building classifier! " + e.getLocalizedMessage();
+							JOptionPane.showMessageDialog(mainRef, message, 
+									"Error building classifier", JOptionPane.ERROR_MESSAGE);
+							mainRef.writeOut(message, true);
+							return;
+						}
+					}
+				};
+				panelCenter.add(new JButton(action));
 			}
 		};
-		learnDataset.putValue(Action.SHORT_DESCRIPTION, "Start learning.");
-		JButton learnButton = new JButton(learnDataset);
-		learnParams.add(learnButton, BorderLayout.EAST);
+		learnerNorth.add(classifierBuilder);
+		
+		
+		NamedBorderedPanel classLoaderPanel = new NamedBorderedPanel("Classifier Loader", 8, 8, 8, 8) {
+			@Override
+			public void init() {
+				this.panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+				classifierLoaderL = new ClassifierLoader(mainRef, true, false);
+				this.panel.add(classifierLoaderL);
+			}
+		};
+		learnerNorth.add(classLoaderPanel);
+		
 	}
 
 	/**

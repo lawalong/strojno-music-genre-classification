@@ -4,9 +4,9 @@
 package hr.fer.su.mgc.test;
 
 import hr.fer.su.mgc.Config;
+import hr.fer.su.mgc.MGC;
 import hr.fer.su.mgc.classifier.ClassifierAdapter;
 import hr.fer.su.mgc.classifier.ClassifierConstants;
-import hr.fer.su.mgc.classifier.IClassifier;
 import hr.fer.su.mgc.features.FeatureExtractor;
 
 import java.io.File;
@@ -28,6 +28,8 @@ public class FeatureExtractorTester {
 	public static void main(String[] args) throws Exception {
 		Config.init();
 		
+		MGC.initMatlabEngine();
+		
 		String[] genres = Config.grabGenres();
 		
 		FeatureExtractor featureExtractor = new FeatureExtractor(genres);
@@ -42,10 +44,7 @@ public class FeatureExtractorTester {
 		File samples = new File("data/allFeatures.arff");
 
 		ClassifierAdapter smo = new ClassifierAdapter(ClassifierConstants.SMO);
-		smo.setGenres(genres);
 		smo.setTrainData(samples);
-		smo.setTestData(samples);
-		smo.setValidation(IClassifier.NO_VALIDATION);
 		smo.buildModel();
 
 		File hypoFile = new File("hypothesis/default.hyp");

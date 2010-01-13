@@ -33,7 +33,8 @@ public class HammingWindowOptimise {
 
 				System.out.println(combFile.getName());
 				smo.setTrainData(combFile);
-				Evaluation eval = smo.buildModel(10);
+				smo.buildModel();
+				Evaluation eval = smo.crossValidate(10);
 				System.out.println(eval.toSummaryString());
 				double correct = eval.correct();
 				if (correct > best) {

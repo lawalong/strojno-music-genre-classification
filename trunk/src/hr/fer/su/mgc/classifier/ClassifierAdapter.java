@@ -31,19 +31,7 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		this.genres = genres;
 	}
 
-	private int validation;
-	
-	public int getValidation() {
-		return validation;
-	}
-
-	public void setValidation(int validation) {
-		this.validation = validation;
-	}
-
 	private Instances trainSet;
-	
-	private Instances testSet;
 	
 	private Classifier classifier;
 	
@@ -55,8 +43,6 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 	 * @throws Exception ukoliko podešavanje opcija ne uspije.
 	 */
 	public ClassifierAdapter(Integer type) throws Exception {
-		validation = 0;
-		
 		switch(type){
 		case ClassifierConstants.LogitBoost: 	classifier = initLogitBoost(); 	break;
 		case ClassifierConstants.SMO: 			classifier = initSMO(); 		break;
@@ -64,7 +50,7 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		}
 	}
 	
-	private LogitBoost initLogitBoost() throws Exception{
+	private LogitBoost initLogitBoost() throws Exception {
 		LogitBoost lb = new LogitBoost();
 		lb.setOptions(Utils.splitOptions(
 				"-P 100 -F 0 -R 1 -L -1.7976931348623157E308 -H 1.0 -S 1 " +
@@ -72,7 +58,7 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		return lb;
 	}
 	
-	private SMO initSMO() throws Exception{
+	private SMO initSMO() throws Exception {
 		SMO smo = new SMO();
 		smo.setOptions(Utils.splitOptions(
 				"-C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -M -V -1 -W 1 -K \"" +
@@ -80,35 +66,36 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		return smo;
 	}
 	
-	public Evaluation buildModel() throws Exception {
-		return buildModel(null);
-	}
-	
 	@Override
-	public Evaluation buildModel(Integer folds) throws Exception {
+	public void buildModel() throws Exception {
 		if(trainSet == null) throw new DataNotFoundException("Train set was not loaded.");
 		classifier.buildClassifier(trainSet);
-		
-		Evaluation eval = null;
-		switch (validation) {
-		case NO_VALIDATION:
-			// Do nothing...
-			break;
-
-		case TEST_SET_VALIDATION:
-			eval = new Evaluation(trainSet);
-			if(testSet == null) throw new DataNotFoundException("Test set was not loaded.");
-			eval.evaluateModel(classifier, testSet);
-			break;
-			
-		case CROSS_VALIDATION:
-			eval = new Evaluation(trainSet);
-			eval.crossValidateModel(classifier, trainSet, folds, new Random(1));
-			break;
-		}
-		
+	}
+	
+	public Evaluation crossValidate(int folds) throws Exception {
+		Evaluation eval = new Evaluation(trainSet);
+		eval.crossValidateModel(classifier, trainSet, folds, new Random(1));
 		return eval;
 	}
+	
+	public Evaluation validate(File testFile) throws Exception {
+		
+		Instances testSet;
+		try {
+			DataSource ds = new DataSource(testFile.getAbsolutePath());
+			testSet = ds.getDataSet();
+			if (testSet.classIndex() == -1)
+				   testSet.setClassIndex(testSet.numAttributes() - 1);
+		} catch (Exception e) {
+			throw new DataNotFoundException("Test data could not not be read.");
+		}
+		
+		if(testSet == null) throw new DataNotFoundException("Test set cannot be null.");
+		Evaluation eval = new Evaluation(trainSet);
+		eval.evaluateModel(classifier, testSet);
+		return eval;
+	}
+	
 
 	@Override
 	public List<double[]> classifyInstances(File unclassified) throws DataNotFoundException {
@@ -131,24 +118,26 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		
 	}
 	
-
-	@Override
-	public void setTestData(File dataFile) throws DataNotFoundException {
-		try {
-			DataSource ds = new DataSource(dataFile.getAbsolutePath());
-			testSet = ds.getDataSet();
-			if (testSet.classIndex() == -1)
-				   testSet.setClassIndex(testSet.numAttributes() - 1);
-		} catch (Exception e) {
-			throw new DataNotFoundException("Test data could not not be read.");
-		}
-	}
-
-	@Override
+	
 	public void setTrainData(File dataFile) throws DataNotFoundException {
 		try {
-			DataSource ds = new DataSource(dataFile.getAbsolutePath());
-			trainSet = ds.getDataSet();
+			setTrainData(new DataSource(dataFile.getAbsolutePath()));
+		} catch (Exception e) {
+			throw new DataNotFoundException("Train data could not not be read.");
+		}
+	}
+	
+	public void setTrainData(DataSource dataSource) throws DataNotFoundException {
+		try {
+			// Update genres...
+			String genreString = dataSource.getDataSet().attribute("class").toString();
+			genreString = genreString.substring(
+					genreString.indexOf('{')+1, genreString.lastIndexOf('}'));
+			String[] parts = genreString.split(",");
+			for(String part : parts) part = part.trim();
+			genres = parts;
+			
+			trainSet = dataSource.getDataSet();
 			if (trainSet.classIndex() == -1)
 				   trainSet.setClassIndex(trainSet.numAttributes() - 1);
 		} catch (Exception e) {

@@ -247,7 +247,7 @@ public class PlayerPanel extends JPanel {
 		
 		Action classify = new AbstractAction("Classify") {
 			public void actionPerformed(ActionEvent event) {
-				if(audioFile != null && mainRef.getHypLoader().hypothesisLoaded()) {
+				if(audioFile != null && mainRef.getClassifierLoader().hypothesisLoaded()) {
 					classifierProgressBar.setValue(0);
 					if(classifierProgressBar.isIndeterminate())
 						classifierProgressBar.setIndeterminate(false);
@@ -260,7 +260,7 @@ public class PlayerPanel extends JPanel {
 				@Override
 				public void run() {
 					try {
-						ClassifierAdapter classifier = mainRef.getHypLoader().getClassifier();
+						ClassifierAdapter classifier = mainRef.getClassifierLoader().getClassifier();
 						final String[] genres = classifier.getGenres();
 						
 						mainRef.writeOut("CLASSIFICATION: Starting classificaton of " +

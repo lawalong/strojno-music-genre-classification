@@ -7,8 +7,6 @@ import hr.fer.su.mgc.matlab.SmartMatlabEngine;
 
 import java.io.File;
 
-import weka.classifiers.Evaluation;
-
 public class TrainTestWithMatlab {
 
 	/**
@@ -31,8 +29,7 @@ public class TrainTestWithMatlab {
 		ClassifierAdapter smo = new ClassifierAdapter(
 				ClassifierConstants.SMO);
 		smo.setTrainData(samples);
-		Evaluation eval = smo.buildModel(10);
-		System.out.println(eval.toSummaryString());
+		smo.buildModel();
 	}
 
 }

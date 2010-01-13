@@ -5,14 +5,18 @@ import hr.fer.su.mgc.classifier.ClassifierAdapter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import weka.core.converters.ConverterUtils.DataSource;
 
 public class Config {
 	
@@ -20,12 +24,15 @@ public class Config {
 	
 	private static Map<String, File> hypotheses;
 	
+	private static Map<String, File> features;
+	
 	public static void init() throws IOException {
 		
 		initConfig();
 		
-		initHypotheses();
+		initClassifiers();
 		
+		initFeatures();
 	}
 
 	private static void initConfig() throws IOException {
@@ -60,25 +67,25 @@ public class Config {
 	}
 	
 	
-	private static void initHypotheses() {
+	public static void initClassifiers() {
 		
 		hypotheses = new HashMap<String, File>();
 		
-		for(File hypFile : new File("hypothesis").listFiles())
+		for(File hypFile : new File("classifiers").listFiles())
 			if(hypFile.isFile()) hypotheses.put(hypFile.getName(), hypFile);
 	}
 	
-	public static File getHypothesisAsFile(String name) {
+
+	public static File getClassifierAsFile(String name) {
 		return hypotheses.get(name);
 	}
 
-	public static ClassifierAdapter getHypothesis(String name) throws Exception {
-		return loadHypothesis(hypotheses.get(name));
+	public static ClassifierAdapter getClassifier(String name) throws Exception {
+		return loadClassifier(hypotheses.get(name));
 	}
 	
-	public static ClassifierAdapter loadHypothesis(File hypothesis) throws Exception {
+	public static ClassifierAdapter loadClassifier(File hypothesis) throws Exception {
 		
-		// Read hypotheses file...
 		ObjectInputStream input = 
 			new ObjectInputStream(new FileInputStream(hypothesis));
 		
@@ -88,13 +95,59 @@ public class Config {
 		return weka;
 	}
 	
-	public static String[] getAllHypothesesNames() {
+	public static void saveClassifier(
+			ClassifierAdapter classifier, File classifierFile) throws Exception {
+
+		ObjectOutputStream output =
+			new ObjectOutputStream(new FileOutputStream(classifierFile));
+		
+		output.writeObject(classifier);
+		output.flush();
+		output.close();
+	}
+	
+	public static String[] getAllClassifierNames() {
 		if(hypotheses.size() == 0) return new String[0];
 		String[] ret = new String[hypotheses.size()];
 		int i = 0;
 		for(String name : hypotheses.keySet()) ret[i++] = name;
 		return ret;
 	}
+	
+	public static void initFeatures() {
+		
+		features = new HashMap<String, File>();
+		
+		for(File featFile : new File("features").listFiles())
+			if(featFile.isFile()) features.put(featFile.getName(), featFile);
+	}
+	
+	public static Map<String, File> getFeatures() {
+		return features;
+	}
+	
+	public static File getFeaturesAsFile(String name) {
+		return features.get(name);
+	}
+	
+	public static DataSource loadFeatures(File featureFile) throws Exception {
+		if(!DataSource.isArff(featureFile.getAbsolutePath()))
+			throw new Exception("ERROR: Bad feature file!");
+		return new DataSource(featureFile.getAbsolutePath());
+	}
+	
+	public static DataSource loadFeatures(String name) throws Exception {
+		return loadFeatures(features.get(name));
+	}
+	
+	public static String[] getAllFeatureNames() {
+		if(features.size() == 0) return new String[0];
+		String[] ret = new String[features.size()];
+		int i = 0;
+		for(String name : features.keySet()) ret[i++] = name;
+		return ret;
+	}
+
 	
 	/**
 	 * Grab default genre array from internal dataset.

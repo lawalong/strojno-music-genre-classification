@@ -6,8 +6,6 @@ import hr.fer.su.mgc.classifier.ClassifierConstants;
 import java.io.File;
 import java.util.List;
 
-import weka.classifiers.Evaluation;
-
 public class TestingClassifiers {
 
 	/**
@@ -25,9 +23,7 @@ public class TestingClassifiers {
 		
 		ClassifierAdapter smo = new ClassifierAdapter(ClassifierConstants.LogitBoost);
 		smo.setTrainData(samples);
-		Evaluation eval = smo.buildModel(null); // 10-fold krosvalidacija
-		//ispisuje općenite statistike testiranja
-		System.out.println(eval.toSummaryString());
+		smo.buildModel(); // 10-fold krosvalidacija
 		
 		File unlabeled = new File("D:/Data/testUnlabeled.arff");
 		List<double[]> res = smo.classifyInstances(unlabeled);

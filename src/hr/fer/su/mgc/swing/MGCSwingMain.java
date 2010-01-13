@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -55,6 +57,8 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jvnet.substance.SubstanceLookAndFeel;
 import org.jvnet.substance.skin.SubstanceBusinessBlueSteelLookAndFeel;
+
+import weka.classifiers.Evaluation;
 
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
@@ -107,6 +111,8 @@ public class MGCSwingMain extends JFrame {
 	protected JPanel learnerNorth;
 	
 	protected JPanel chartPanel;
+	
+	protected JPanel chartPanelL;
 
 	public JTextField inputFieldL;
 	
@@ -275,7 +281,7 @@ public class MGCSwingMain extends JFrame {
 					public void actionPerformed(ActionEvent event) {
 						
 						if(!featureLoader.featuresLoaded()) {
-							String message = "No loaded features!";
+							String message = "No features loaded!";
 							JOptionPane.showMessageDialog(mainRef, message, 
 									"Error building classifier", JOptionPane.ERROR_MESSAGE);
 							return;
@@ -320,6 +326,139 @@ public class MGCSwingMain extends JFrame {
 		};
 		learnerNorth.add(classLoaderPanel);
 		
+		NamedBorderedPanel classTesterPanel = new NamedBorderedPanel("Classifier Tester", 8, 8, 8, 8) {
+			
+			protected JComboBox testBox;
+			
+			protected JProgressBar testProgress;
+			
+			protected JPanel testingChartPanel;
+			
+			protected MultiClassificationThread classThread;
+			
+			@Override
+			public void init() {
+				this.panel.setLayout(new BoxLayout(this.panel, BoxLayout.Y_AXIS));
+				
+				JPanel panel = new JPanel(new BorderLayout());
+				this.panel.add(panel);
+				
+				testingChartPanel = new JPanel(new BorderLayout());
+				testingChartPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 16, 0));
+				this.panel.add(testingChartPanel);
+				
+				JPanel panelLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+				panel.add(panelLeft, BorderLayout.WEST);
+				
+				JPanel panelRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
+				panel.add(panelRight, BorderLayout.EAST);
+				
+				panelLeft.add(new JLabel("<html><b>Validation Type:</b></html>"));
+				
+				testBox = new JComboBox(new String[] {"Cross 10-folds", "DATASET"});
+				testBox.setSelectedIndex(0);
+				panelLeft.add(testBox);
+				
+				testProgress = new JProgressBar();
+				testProgress.setIndeterminate(true);
+				testProgress.setValue(0);
+				testProgress.setStringPainted(true);
+				JPanel temp = new JPanel(new BorderLayout());
+				temp.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
+				temp.add(testProgress, BorderLayout.CENTER);
+				panel.add(temp, BorderLayout.CENTER);
+				
+				Action action = new AbstractAction("Validate") {
+					public void actionPerformed(ActionEvent event) {
+						
+						if(!classifierLoaderL.classifierLoaded()) {
+							String message = "No classifier loaded!";
+							JOptionPane.showMessageDialog(mainRef, message, 
+									"Error validating classifier", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+						
+						String selection = testBox.getSelectedItem().toString();
+						ClassifierAdapter classifier = classifierLoaderL.getClassifier();
+						Evaluation eval;
+						if(selection.equals("Cross 10-folds")) {
+							try {
+								eval = classifier.crossValidate(10);
+							} catch (Exception e) {
+								String message = "Error cross validating classifer! " + e.getLocalizedMessage();
+								JOptionPane.showMessageDialog(mainRef, message, 
+										"Error validating classifier", JOptionPane.ERROR_MESSAGE);
+								return;
+							}
+							
+							eval.toSummaryString();
+							
+							testingChartPanel.removeAll();
+							
+							chartPanelL = new JPanel(new GridLayout(1, 2, 16, 0));
+							chartPanelL.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+							chartPanelL.add(new JTextArea(eval.toSummaryString()));
+							testingChartPanel.add(chartPanelL, BorderLayout.CENTER);
+							
+							testingChartPanel.revalidate();
+							
+							learnerScroll.getVerticalScrollBar().setValue(
+									learnerScroll.getVerticalScrollBar().getMaximum());
+					    	
+							learnerScroll.invalidate();
+							
+							
+							// TODO
+						} else if(selection.equals("DATASET")) {
+							JFileChooser fc = mainRef.getFileChooser();
+							int tmp = fc.getFileSelectionMode();
+							fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+							if (fc.showOpenDialog(mainRef) == JFileChooser.APPROVE_OPTION) {
+								File selectedFile = fc.getSelectedFile();
+								fc.setFileSelectionMode(tmp);
+								
+								if(selectedFile.isDirectory()) {
+									
+									// Count how many files there are...
+									int counter = 0;
+									for(File genreDir : selectedFile.listFiles())
+										if(genreDir.isDirectory())
+											for(File tmpSong : genreDir.listFiles())
+												if(tmpSong.isFile()) counter++;
+
+
+									testProgress.setMaximum(counter + 1);
+									testProgress.setValue(0);
+									if(testProgress.isIndeterminate())
+										testProgress.setIndeterminate(false);
+									
+									classThread = new MultiClassificationThread(mainRef, 
+											classifier, selectedFile, testingChartPanel, testProgress, learnerScroll);
+									classThread.start();
+								}
+								
+							} else {
+								fc.setFileSelectionMode(tmp);
+							}
+							
+						}
+					}
+				};
+				panelRight.add(new JButton(action));
+				
+				action = new AbstractAction("Stop") {
+					public void actionPerformed(ActionEvent event) {
+						if(classThread != null && classThread.isAlive()) {
+							mainRef.writeOut("Stoping dataset classification...", false);
+							classThread.stopThreadASAP();	
+						}
+					}
+				};
+				panelRight.add(new JButton(action));
+				
+			}
+		};
+		learnerNorth.add(classTesterPanel);
 	}
 
 	/**
@@ -468,19 +607,6 @@ public class MGCSwingMain extends JFrame {
 		fileChooser = new JFileChooser(fileChooser.getCurrentDirectory());
 	}
 	
-	public void writeOut(String message, boolean errorFlag) {
-		if(errorFlag) {
-			System.err.println(message);
-			output.append(message + "\n");
-		} else {
-			System.out.println(message);
-			output.append(message + "\n");
-		}
-		
-		output.setCaretPosition(output.getDocument().getLength());
-
-	}
-	
 	public void updateCharts(String[] genres, double[] result, int index) {
 		if(genres.length != result.length) {
 			writeOut("Error generating charts. " +
@@ -537,6 +663,8 @@ public class MGCSwingMain extends JFrame {
 		
 		classifierScroll.getVerticalScrollBar().setValue(
 				classifierScroll.getVerticalScrollBar().getMaximum());
+		
+		classifierScroll.invalidate();
 	}
 	
 	public void removeCharts() {
@@ -549,6 +677,22 @@ public class MGCSwingMain extends JFrame {
 		classifierNorth.repaint();
 	}
 	
+	public void writeOut(String message, boolean errorFlag) {
+		if(errorFlag) {
+			System.err.println(message);
+			output.append(message + "\n");
+		} else {
+			System.out.println(message);
+			output.append(message + "\n");
+		}
+		
+		output.setCaretPosition(output.getDocument().getLength());
+	}
+	
+	public void clearOut() {
+		output.setText("");
+	}
+	
 	public static void writeOut(String message, 
 			boolean errorFlag, MGCSwingMain frameRef) {
 		if(errorFlag) {
@@ -559,6 +703,7 @@ public class MGCSwingMain extends JFrame {
 			frameRef.output.append(message + "\n");
 		}
 	}
+	
 
 	/**
 	 * Sets the default font for all Swing components.<br>

@@ -76,7 +76,7 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		return smo;
 	}
 	
-	private RotationForest initRotationForest() throws Exception{
+	private RotationForest initRotationForest() throws Exception {
 		RotationForest rf = new RotationForest();
 		rf.setOptions(Utils.splitOptions(
 				"-G 3 -H 3 -P 50 -F \"weka.filters.unsupervised.attribute.PrincipalComponents " +
@@ -84,7 +84,7 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		return rf;
 	}
 	
-	private MultilayerPerceptron initMultilayerPerceptron() throws Exception{
+	private MultilayerPerceptron initMultilayerPerceptron() throws Exception {
 		MultilayerPerceptron mlp = new MultilayerPerceptron();
 		mlp.setOptions(Utils.splitOptions(
 				"-L 0.3 -M 0.2 -N 500 -V 0 -S 0 -E 20 -H a"));
@@ -168,6 +168,11 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		} catch (Exception e) {
 			throw new DataNotFoundException("Train data could not not be read.");
 		}
+	}
+	
+	public boolean supportedGenre(String genre) {
+		for(String gen : genres) if(genre.equalsIgnoreCase(gen)) return true;
+		return false;
 	}
 
 }

@@ -182,7 +182,7 @@ public class ClassifierLoader extends JPanel {
 
 	}
 	
-	public boolean hypothesisLoaded() {
+	public boolean classifierLoaded() {
 		return classifier != null;
 	}
 

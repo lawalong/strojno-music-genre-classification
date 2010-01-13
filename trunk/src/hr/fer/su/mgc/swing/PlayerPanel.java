@@ -247,7 +247,7 @@ public class PlayerPanel extends JPanel {
 		
 		Action classify = new AbstractAction("Classify") {
 			public void actionPerformed(ActionEvent event) {
-				if(audioFile != null && mainRef.getClassifierLoader().hypothesisLoaded()) {
+				if(audioFile != null && mainRef.getClassifierLoader().classifierLoaded()) {
 					classifierProgressBar.setValue(0);
 					if(classifierProgressBar.isIndeterminate())
 						classifierProgressBar.setIndeterminate(false);
@@ -269,6 +269,7 @@ public class PlayerPanel extends JPanel {
 						FeatureExtractor featureExtractor = new FeatureExtractor(genres);
 						
 						long time = System.currentTimeMillis();
+						long totalTime = System.currentTimeMillis();
 						
 						File tempFile;
 						try {
@@ -310,8 +311,11 @@ public class PlayerPanel extends JPanel {
 						
 						if(song.exists()) song.delete();
 						
-						mainRef.writeOut("CLASSIFICATION: Classification completed in " + 
+						mainRef.writeOut("CLASSIFICATION: Classified in " + 
 								((System.currentTimeMillis() - time)/1000f) + " seconds.", false);
+						
+						mainRef.writeOut("CLASSIFICATION: Classification completed in " + 
+								((System.currentTimeMillis() - totalTime)/1000f) + " seconds.", false);
 						
 						updateSlider(90);
 						
@@ -334,7 +338,7 @@ public class PlayerPanel extends JPanel {
 								
 								mainRef.updateCharts(genres, result, tempInd);
 
-								mainRef.writeOut("Updating charts took " + 
+								mainRef.writeOut("Generating charts took " + 
 										((System.currentTimeMillis() - time)/1000f) + " seconds.", false);
 						    }
 						});

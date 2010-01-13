@@ -12,8 +12,10 @@ import java.util.Random;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.meta.LogitBoost;
+import weka.classifiers.meta.RotationForest;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -36,21 +38,29 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 	private Classifier classifier;
 	
 	/**
-	 * Konstruktor klasifikatora kernel SVM (SMO).
-	 * Sequential minimal optimization.
+	 * Konstruktor klasifikatora.
 	 *  
 	 * @param type vrsta klasifikatora koji se koristi (popis u ClassifierConstants)
 	 * @throws Exception ukoliko podešavanje opcija ne uspije.
 	 */
-	public ClassifierAdapter(Integer type) throws Exception {
+	public ClassifierAdapter(Integer type) throws Exception {		
 		switch(type){
-		case ClassifierConstants.LogitBoost: 	classifier = initLogitBoost(); 	break;
-		case ClassifierConstants.SMO: 			classifier = initSMO(); 		break;
-		
+		case ClassifierConstants.LogitBoost: 	
+			classifier = initLogitBoost(); 		
+			break;
+		case ClassifierConstants.SMO: 			
+			classifier = initSMO(); 			
+			break;
+		case ClassifierConstants.RotationForest:
+			classifier = initRotationForest();	
+			break;
+		case ClassifierConstants.MultilayerPerceptron:
+			classifier = initMultilayerPerceptron();
+			break;
 		}
 	}
 	
-	private LogitBoost initLogitBoost() throws Exception {
+	private LogitBoost initLogitBoost() throws Exception{
 		LogitBoost lb = new LogitBoost();
 		lb.setOptions(Utils.splitOptions(
 				"-P 100 -F 0 -R 1 -L -1.7976931348623157E308 -H 1.0 -S 1 " +
@@ -58,12 +68,27 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		return lb;
 	}
 	
-	private SMO initSMO() throws Exception {
+	private SMO initSMO() throws Exception{
 		SMO smo = new SMO();
 		smo.setOptions(Utils.splitOptions(
 				"-C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -M -V -1 -W 1 -K \"" +
 		"weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 2.0\""));
 		return smo;
+	}
+	
+	private RotationForest initRotationForest() throws Exception{
+		RotationForest rf = new RotationForest();
+		rf.setOptions(Utils.splitOptions(
+				"-G 3 -H 3 -P 50 -F \"weka.filters.unsupervised.attribute.PrincipalComponents " +
+				"-R 1.0 -A 5 -M -1 -D\" -S 1 -I 10 -W weka.classifiers.trees.J48 -- -C 0.25 -M 2"));
+		return rf;
+	}
+	
+	private MultilayerPerceptron initMultilayerPerceptron() throws Exception{
+		MultilayerPerceptron mlp = new MultilayerPerceptron();
+		mlp.setOptions(Utils.splitOptions(
+				"-L 0.3 -M 0.2 -N 500 -V 0 -S 0 -E 20 -H a"));
+		return mlp;
 	}
 	
 	@Override

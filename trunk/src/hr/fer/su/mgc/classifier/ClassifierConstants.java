@@ -23,5 +23,17 @@ public class ClassifierConstants {
 	 */
 	public static final int SMO = 2;
 	
-	//... more to come maybe :)
+	/**
+	 * RotationForest.
+	 * Bazni klasifikator je J48 stablo odluke.
+	 * Provodi analizu glavnih komponenti.
+	 */
+	public static final int RotationForest = 3;
+	
+	/**
+	 * Višeslojni perceptron.
+	 * Provodi propagaciju uatrag i na taj način podešava težine mreže.
+	 * Broj slojeva u skrivenom sloju ovisi o broju atributa i razreda.
+	 */
+	public static final int MultilayerPerceptron = 4;
 }

@@ -223,11 +223,11 @@ public class MultiClassificationThread extends Thread {
 				// Create Pie Chart ...
 				
 				DefaultPieDataset pieDataset = new DefaultPieDataset();
-				pieDataset.setValue("Ispravno", totalCorrect);
-				pieDataset.setValue("Neispravno", totalFalse);
+				pieDataset.setValue("Correct", totalCorrect);
+				pieDataset.setValue("Incorrect", totalFalse);
 				
 				JFreeChart chart = ChartFactory.createPieChart(
-						"Klasifikacija Ispravno/Neispravno", pieDataset, true, true, false);
+						"Classification Correct/Incorrect", pieDataset, true, true, false);
 				PiePlot plot = (PiePlot) chart.getPlot();
 				plot.setCircular(true);
 				plot.setBackgroundAlpha(0.1f);
@@ -245,7 +245,7 @@ public class MultiClassificationThread extends Thread {
 				}
 				
 				chart = ChartFactory.createBarChart(
-						"Točnost klasifikacije po žanrovima", "Žanrovi", "Postotak točne klasifikacije", 
+						"Classification percentage on genres.", "Genres", "Percentage", 
 						barDataset, PlotOrientation.VERTICAL, true, true, false);
 				
 				chart.getPlot().setBackgroundAlpha(0.1f);

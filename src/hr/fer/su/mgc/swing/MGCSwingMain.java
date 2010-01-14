@@ -640,7 +640,7 @@ public class MGCSwingMain extends JFrame {
 			barDataset.addValue(result[i], genres[i], "");
 		
 		chart = ChartFactory.createBarChart(
-				genres[index], "Žanrovi", "Postotak", barDataset, PlotOrientation.VERTICAL, true, true, false);
+				genres[index], "Genres", "Percentage", barDataset, PlotOrientation.VERTICAL, true, true, false);
 		
 		chart.getPlot().setBackgroundAlpha(0.1f);
 		final JPanel barPanel = new ChartPanel(chart, true);

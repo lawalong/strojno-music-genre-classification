@@ -16,6 +16,7 @@ import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.meta.LogitBoost;
 import weka.classifiers.meta.RotationForest;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -119,6 +120,25 @@ public class ClassifierAdapter implements IClassifier, Serializable {
 		Evaluation eval = new Evaluation(trainSet);
 		eval.evaluateModel(classifier, testSet);
 		return eval;
+	}
+	
+	
+	public double[] classifyInstance(File unclassified) throws DataNotFoundException {
+		try {
+			Instances insts = new Instances(new BufferedReader(
+					new FileReader(unclassified)));
+			
+			Instance inst = insts.firstInstance();
+			
+			inst.setDataset(trainSet);
+			
+			return classifier.distributionForInstance(inst);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DataNotFoundException("Could not find data for classification.");
+		}
+		
 	}
 	
 

@@ -137,7 +137,7 @@ public class MultiClassificationThread extends Thread {
 				
 				if(tempFile.exists()) tempFile.delete();
 
-				result = classifier.classifyInstances(song).get(0);
+				result = classifier.classifyInstance(song);
 				
 				if(song.exists()) song.delete();
 				

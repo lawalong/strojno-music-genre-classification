@@ -25,7 +25,7 @@ public class MGConverter {
 	public static final int THREAD_COUNT = 4;
 	
 	/**
-	 * Threshold for float comparisions. If the difference between two floats is
+	 * Threshold for float comparisons. If the difference between two floats is
 	 * smaller than DELTA, they are considered equal.
 	 */
 	private static final float DELTA = 1E-9F;

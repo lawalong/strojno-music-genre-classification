@@ -8,6 +8,8 @@ import hr.fer.su.mgc.features.FeatureExtractor;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
@@ -48,7 +50,7 @@ public class MultiClassificationThread extends Thread {
 	private int totalCorrect;
 	private int totalFalse;
 	
-	private boolean stopFlag = false;
+	private volatile boolean stopFlag = false;
 	
 	public void stopThreadASAP() {
 		this.stopFlag = true;
@@ -94,9 +96,10 @@ public class MultiClassificationThread extends Thread {
 			falseClassCounter = new int[genres.length];
 			totalCorrect = totalFalse = 0;
 			
-			String trueFalseVar;
+			String trueFalseVar, genreName;
 			
-			String genreName;
+			Map<File, String> tmpFileList = new HashMap<File, String>();
+			
 			for(File genreDir : classificationTarget.listFiles()) {
 				if(genreDir.isDirectory()) {
 					genreName = genreDir.getName().trim();
@@ -109,54 +112,59 @@ public class MultiClassificationThread extends Thread {
 					
 					for(File tmpSong : genreDir.listFiles()) {
 						if(tmpSong.isFile()) {
-							
-							time = System.currentTimeMillis();
-							
-							try {
-								tempFile = MGCconv.convertForClassification(tmpSong);
-							} catch (ConversionException cex) {
-								final String message = 
-									"VALIDATION ERROR: " + cex.getLocalizedMessage() + 
-									"\n Skipping file " + tmpSong.getName() + ".";
-								mainRef.writeOut(message, true);
-								continue;
-							}
-							
-							song = featureExtractor.extractSongFeatures(new File[] {tempFile});
-							
-							if(tempFile.exists()) tempFile.delete();
-
-							result = classifier.classifyInstances(song).get(0);
-							
-							if(song.exists()) song.delete();
-							
-							max = 0; ind = -1;
-							for (int i = 0; i < result.length; ++i) {
-								if (max < result[i]) { max = result[i]; ind = i; }
-							}
-							
-							if(genres[ind].equalsIgnoreCase(genreName)) {
-								correctClassCounter[ind]++;
-								totalCorrect++;
-								trueFalseVar = "TRUE";
-							} else {
-								falseClassCounter[grabIndexFromGenres(genres, genreName)]++;
-								totalFalse++;
-								trueFalseVar = "FALSE";
-							}
-							
-							mainRef.writeOut("VALIDATION: " + genreName + "/" + tmpSong.getName() + " => " + 
-									genres[ind] + " => " + trueFalseVar + ". Completed in " + 
-									((System.currentTimeMillis() - time)/1000f) + " seconds.", false);
-							
-							if(stopFlag) { finish(); return; }
-							
-							updateSlider(++counter);
-							
-							if(counter % 5 == 0) updateDatasetTestingCharts();
+							tmpFileList.put(tmpSong, genreName);
 						}
 					}
 				}
+			}
+			
+			for(File tmpSong : tmpFileList.keySet()) {
+				genreName = tmpFileList.get(tmpSong);
+				
+				time = System.currentTimeMillis();
+				
+				try {
+					tempFile = MGCconv.convertForClassification(tmpSong);
+				} catch (ConversionException cex) {
+					final String message = 
+						"VALIDATION ERROR: " + cex.getLocalizedMessage() + 
+						"\n Skipping file " + tmpSong.getName() + ".";
+					mainRef.writeOut(message, true);
+					continue;
+				}
+				
+				song = featureExtractor.extractSongFeatures(new File[] {tempFile});
+				
+				if(tempFile.exists()) tempFile.delete();
+
+				result = classifier.classifyInstances(song).get(0);
+				
+				if(song.exists()) song.delete();
+				
+				max = 0; ind = -1;
+				for (int i = 0; i < result.length; ++i) {
+					if (max < result[i]) { max = result[i]; ind = i; }
+				}
+				
+				if(genres[ind].equalsIgnoreCase(genreName)) {
+					correctClassCounter[ind]++;
+					totalCorrect++;
+					trueFalseVar = "TRUE";
+				} else {
+					falseClassCounter[grabIndexFromGenres(genres, genreName)]++;
+					totalFalse++;
+					trueFalseVar = "FALSE";
+				}
+				
+				mainRef.writeOut("VALIDATION: " + genreName + "/" + tmpSong.getName() + " => " + 
+						genres[ind] + " => " + trueFalseVar + ". Completed in " + 
+						((System.currentTimeMillis() - time)/1000f) + " seconds.", false);
+				
+				if(stopFlag) { finish(); return; }
+				
+				updateSlider(++counter);
+				
+				if(counter % 5 == 0) updateDatasetTestingCharts();
 			}
 			
 			finish();

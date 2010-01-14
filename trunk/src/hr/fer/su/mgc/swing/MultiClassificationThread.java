@@ -245,7 +245,7 @@ public class MultiClassificationThread extends Thread {
 				}
 				
 				chart = ChartFactory.createBarChart(
-						"Classification percentage on genres.", "Genres", "Percentage", 
+						"Classification percentage by genres", "Genres", "Percentage", 
 						barDataset, PlotOrientation.VERTICAL, true, true, false);
 				
 				chart.getPlot().setBackgroundAlpha(0.1f);

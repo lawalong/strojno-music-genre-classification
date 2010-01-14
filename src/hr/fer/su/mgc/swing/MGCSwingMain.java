@@ -274,7 +274,8 @@ public class MGCSwingMain extends JFrame {
 				
 				panelLeft.add(new JLabel("<html><b>Build Classifier:</b></html>"));
 				
-				classTypesCombo = new JComboBox(new String[] {"LogitBoost", "SMO"});
+				classTypesCombo = new JComboBox(
+						new String[] {"LogitBoost", "SMO", "RotationForest", "MultilayerPerceptron"});
 				panelLeft.add(classTypesCombo);
 				
 				Action action = new AbstractAction("Build") {
@@ -294,6 +295,10 @@ public class MGCSwingMain extends JFrame {
 								classifier = new ClassifierAdapter(ClassifierConstants.LogitBoost);
 							} else if(selection.equals("SMO")) {
 								classifier = new ClassifierAdapter(ClassifierConstants.SMO);
+							} else if(selection.equals("RotationForest")) {
+								classifier = new ClassifierAdapter(ClassifierConstants.RotationForest);
+							} else if(selection.equals("MultilayerPerceptron")) {
+								classifier = new ClassifierAdapter(ClassifierConstants.MultilayerPerceptron);
 							} else return;
 							classifier.setTrainData(featureLoader.getFeatures());
 							classifier.buildModel();

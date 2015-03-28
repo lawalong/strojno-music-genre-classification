@@ -1,0 +1,1 @@
+This projects goal is to build a system for music genre classification. It uses matlab for feature extraction, and java for classification.
